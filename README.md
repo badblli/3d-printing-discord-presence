@@ -14,7 +14,7 @@ Show your Bambu Lab A1 Combo print progress as Discord Rich Presence on Windows.
 
 ## Setup
 
-1. Download and open `3DPrinting.exe` from Releases, or follow the developer steps below to run from source.
+1. Follow the developer steps below to run from source or build `3DPrinting.exe`.
 2. Enter the printer IP address, printer serial number (not the AMS serial), LAN access code and Discord Application ID.
 3. In Discord, enable activity sharing under **User Settings → Activity Privacy**.
 4. Press **Save and start**. The computer and printer must be on the same local network, and the Discord desktop app must be running.
