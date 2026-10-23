@@ -2,7 +2,7 @@
 
 Show your Bambu Lab A1 Combo print progress as Discord Rich Presence on Windows. The app reads printer telemetry over your local network. It does not sign in to your Bambu account or send printer control commands.
 
-![3D Printing app icon](assets/app-icon-3d-printing-v1.png)
+![3D Printing app icon](assets/app-icon-maker-pixel-v2.png)
 
 ## Features
 
@@ -19,7 +19,7 @@ Show your Bambu Lab A1 Combo print progress as Discord Rich Presence on Windows.
 3. In Discord, enable activity sharing under **User Settings → Activity Privacy**.
 4. Press **Save and start**. The computer and printer must be on the same local network, and the Discord desktop app must be running.
 
-Create a Discord application in the [Discord Developer Portal](https://discord.com/developers/applications), then copy **General Information → Application ID**. You do not need to create a bot. Set the application's name and upload its image in the portal if you want to customize the Discord profile card; the included icon is used by the Windows app.
+Create a Discord application in the [Discord Developer Portal](https://discord.com/developers/applications), then copy **General Information → Application ID**. You do not need to create a bot. Set the application's name and upload `assets/app-icon-maker-pixel-v2.png` in the portal if you want to customize the Discord profile card; the included pixel-art icon is used by the Windows app.
 
 The A1's IP, serial number and LAN access code are available in the printer's network and device information settings. The exact menu names may vary by firmware. Never share your LAN access code. Enabling LAN Only can disable Bambu Handy and cloud access; this app does not change the printer's network mode.
 
@@ -37,7 +37,7 @@ Build a standalone executable:
 
 ```powershell
 .venv/Scripts/python -m pip install pyinstaller==6.16.0
-.venv/Scripts/python -m PyInstaller --noconfirm --onefile --windowed --name 3DPrinting --icon assets/app-icon-3d-printing-v1.ico --add-data "bambu.cert;." --add-data "assets/app-icon-3d-printing-v1.png;assets" app.py
+.venv/Scripts/python -m PyInstaller --noconfirm --onefile --windowed --name 3DPrinting --icon assets/app-icon-maker-pixel-v2.ico --add-data "bambu.cert;." --add-data "assets/app-icon-maker-pixel-v2.png;assets" app.py
 ```
 
 Start the saved connection automatically with `3DPrinting.exe --start`.

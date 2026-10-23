@@ -37,8 +37,8 @@ class App:
         }
         self.root.configure(bg=self.colors['bg'])
         try:
-            icon_path = self.resource_path('assets/app-icon-3d-printing-v1.png')
-            self.window_icon = ImageTk.PhotoImage(Image.open(icon_path).resize((64, 64), Image.Resampling.LANCZOS))
+            icon_path = self.resource_path('assets/app-icon-maker-pixel-v2.png')
+            self.window_icon = ImageTk.PhotoImage(Image.open(icon_path).resize((64, 64), Image.Resampling.NEAREST))
             self.root.iconphoto(True, self.window_icon)
         except Exception:
             self.window_icon = None
@@ -63,7 +63,7 @@ class App:
         header.pack(fill='x', pady=(0, 18))
         self.header_icon = None
         if self.window_icon:
-            self.header_icon = ImageTk.PhotoImage(Image.open(icon_path).resize((58, 58), Image.Resampling.LANCZOS))
+            self.header_icon = ImageTk.PhotoImage(Image.open(icon_path).resize((58, 58), Image.Resampling.NEAREST))
             ttk.Label(header, image=self.header_icon).pack(side='left', padx=(0, 14))
         title_group = ttk.Frame(header)
         title_group.pack(side='left', fill='y', pady=3)
@@ -224,7 +224,7 @@ class App:
     def hide(self):
         try:
             if self.tray is None:
-                image = Image.open(self.resource_path('assets/app-icon-3d-printing-v1.png')).convert('RGBA').resize((64, 64), Image.Resampling.LANCZOS)
+                image = Image.open(self.resource_path('assets/app-icon-maker-pixel-v2.png')).convert('RGBA').resize((64, 64), Image.Resampling.NEAREST)
                 self.tray = pystray.Icon('ThreeDPrinting', image, '3D Printing', pystray.Menu(
                     pystray.MenuItem('Ayarları aç', lambda *_: self.events.put(('show', None)), default=True),
                     pystray.MenuItem('Tamamen çık', lambda *_: self.events.put(('quit', None))),
