@@ -184,7 +184,8 @@ class App:
                     self.quit()
                 elif key == 'printer':
                     self.printer.set(value)
-                    self.set_connection_state('connected' if 'bağlandı' in value.lower() or 'connected' in value.lower() else 'warning')
+                    status = value.lower()
+                    self.set_connection_state('connected' if 'bağlandı' in status or 'yazıcı bağlı' in status or 'connected' in status else 'warning')
                 elif key == 'discord':
                     self.discord.set(value)
                     if 'bağlandı' in value.lower() or 'connected' in value.lower():
