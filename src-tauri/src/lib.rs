@@ -40,6 +40,14 @@ fn show_main(app: &AppHandle) {
     }
 }
 
+/// The frontend calls once its first usable frame (including recovery UI) is ready.
+#[tauri::command]
+fn ui_ready(window: tauri::WebviewWindow) {
+    if !std::env::args().any(|arg| arg == HIDDEN_ARG) {
+        let _ = window.show();
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -52,6 +60,7 @@ pub fn run() {
             Some(vec![HIDDEN_ARG]),
         ))
         .invoke_handler(tauri::generate_handler![
+            ui_ready,
             commands::get_config,
             commands::save_config,
             commands::delete_printer,
@@ -108,8 +117,18 @@ pub fn run() {
                 supervisor,
                 exit_state: std::sync::atomic::AtomicU8::new(0),
             });
+            // Safety net: if the frontend never reports ready (e.g. a load error), still
+            // show the window so the app is not invisible and unreachable.
             if !std::env::args().any(|arg| arg == HIDDEN_ARG) {
-                show_main(app.handle());
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+                    if let Some(window) = handle.get_webview_window("main") {
+                        if !window.is_visible().unwrap_or(true) {
+                            let _ = window.show();
+                        }
+                    }
+                });
             }
             Ok(())
         })

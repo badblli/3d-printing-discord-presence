@@ -16,13 +16,15 @@
         "title": "3D Printing",
         "width": 760,
         "height": 640,
-        "minWidth": 640,
-        "minHeight": 560,
+        "decorations": false,
+        "shadow": true,
+        "resizable": false,
+        "backgroundColor": "#0d1117",
         "visible": false
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' data: asset: http://asset.localhost; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self'; img-src https://raw.githubusercontent.com 'self' data: asset: http://asset.localhost; style-src 'self' 'unsafe-inline'"
     }
   },
   "bundle": {
