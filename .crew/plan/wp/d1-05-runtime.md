@@ -4,7 +4,7 @@
 - Engine: codex
 - Model: deep
 - Phase: D1
-- Branch: `codex/d1-05-runtime` (base: `main`)
+- Branch: `codex/d1-05-runtime` (base: `origin/v2`)
 - Depends on: d1-02-presence, d1-03-bambu, d1-04-config (birleştirilmiş olmalı)
 - Role: implementer
 
@@ -30,7 +30,11 @@ arayüz durumu canlı olarak alır ve ayarları değiştirebilir.
 3. Olaylar: `snapshot` olayı durum değiştikçe (en fazla saniyede bir) yayınlanır.
 4. `src/lib/api.ts`: komut ve olay tipleri (Rust serde çıktısıyla birebir), `invoke`/`listen` sarmalayıcıları.
 5. İlk açılışta yapılandırma yoksa ve Windows'ta eski ayarlar varsa `snapshot` içinde `legacy_available: true`.
-6. Testler: seçim mantığı ve yeniden başlatma için sahte `PrinterSource` ile birim testleri.
+6. İlk açılışta (yapılandırma dosyası yokken) dil, işletim sistemi diline göre seçilsin (`tr*` → Tr, diğer → En).
+7. Discord Application ID: `presence::app_id(config.discord.app_id_override)`; `None` ise Discord devre dışı ve
+   snapshot'ta `discord: "no_app_id"` durumu (arayüz kullanıcıya açıklar). Discord kapalıysa (`enabled=false`) `PresenceClient` oluşturulmaz.
+8. Tepsi menüsü metinleri ayardaki dile göre (TR: Göster / Tamamen çık, EN: Show / Quit); dil değişince menü güncellenir.
+9. Testler: seçim mantığı ve yeniden başlatma için sahte `PrinterSource` ile birim testleri.
 
 ## Acceptance criteria
 
@@ -40,5 +44,10 @@ arayüz durumu canlı olarak alır ve ayarları değiştirebilir.
 - [ ] Lider `npm run tauri dev` ile uygulamanın açıldığını, tepsiye küçüldüğünü ve gerçek A1 Combo ile Discord kartının göründüğünü doğrular.
 
 ## Notes
+
+- Mevcut modüller (v2'de): `presence::{activity_for, PresenceClient, PresenceState, app_id}`, `printers::bambu::BambuSource`,
+  `config::{ConfigStore, KeyringStore, SecretStore, legacy::import_legacy}`. Bambu `model` alanı yapılandırmadan gelir.
+- Moonraker/OctoPrint/PrusaLink kaynakları henüz yok (D2): bu türler yapılandırmada olabilir ama `Supervisor` onlar için
+  yalnızca `Connection { Error(Protocol) }` değil, ayrı bir "desteklenmiyor" durumu raporlasın (snapshot'ta `unsupported: true`).
 
 - Tauri izinlerini (`capabilities/`) yalnızca kullanılan komutlara aç.
