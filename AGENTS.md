@@ -44,11 +44,18 @@ Always use these exact commands (same tool versions as CI); the lead re-runs the
 ```sh
 # Legacy Python app (until it is removed)
 .venv/Scripts/python -m unittest -v test_bridge
-# Tauri app (once D1 lands; the WP states which apply)
-cargo test --manifest-path src-tauri/Cargo.toml
-cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+# Tauri app (the sandbox has no network: always pass --offline; crates are prefetched)
+cargo test --offline --manifest-path src-tauri/Cargo.toml
+cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 npm run lint && npm test
 ```
+
+## Dependencies and shared types
+
+- Crates are declared in `src-tauri/Cargo.toml` and prefetched. If you need one that is not there,
+  do not add it: say so under "Decisions needed". Use rustls through `rumqttc::tokio_rustls::rustls`.
+- `src-tauri/src/model.rs` and the `PrinterSource` trait in `src-tauri/src/printers/mod.rs` are shared
+  contracts; change them only if your WP says so, otherwise ask in your report.
 
 ## Final report (your last message, exactly these headings)
 
