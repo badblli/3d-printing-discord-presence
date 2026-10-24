@@ -38,3 +38,10 @@ windows = { version = "0.62.2", features = ["Win32_Foundation", "Win32_Security_
 
 [dev-dependencies]
 tempfile = "3.27.0"
+
+# Full debug info makes each worktree's target/ ~5 GB; line tables keep backtraces usable.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
