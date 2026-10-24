@@ -106,6 +106,25 @@ export interface Snapshot {
 export const getConfig = (): Promise<ConfigView> => invoke('get_config');
 export const getSnapshot = (): Promise<Snapshot> => invoke('get_snapshot');
 
+export type UpdateStatus =
+  | { state: 'idle' | 'checking' | 'ready' }
+  | { state: 'available'; version: string; notes: string | null }
+  | { state: 'downloading'; percent: number }
+  | { state: 'error'; code: 'check_failed' | 'download_failed' | 'install_failed' };
+
+export interface UpdateSnapshot {
+  current_version: string;
+  last_checked_ms: number | null;
+  status: UpdateStatus;
+}
+
+export const getUpdateState = (): Promise<UpdateSnapshot> => invoke('get_update_state');
+export const checkForUpdates = (): Promise<UpdateSnapshot> => invoke('check_for_updates');
+export const installUpdate = (): Promise<void> => invoke('install_update');
+export function onUpdate(handler: (snapshot: UpdateSnapshot) => void): Promise<UnlistenFn> {
+  return listen<UpdateSnapshot>('update', event => handler(event.payload));
+}
+
 export function saveConfig(config: AppConfig, secrets: SecretUpdate[] = []): Promise<ConfigView> {
   // Strip the response-only flag even when the caller passes a ConfigView back.
   const input: AppConfig = {

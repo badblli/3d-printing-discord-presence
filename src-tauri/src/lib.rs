@@ -4,6 +4,7 @@ pub mod model;
 pub mod presence;
 pub mod printers;
 pub mod runtime;
+pub mod updates;
 
 use std::sync::{atomic::Ordering, Arc};
 use tauri::menu::{Menu, MenuItem};
@@ -29,7 +30,9 @@ fn update_tray_language(app: &AppHandle, lang: config::Lang) -> tauri::Result<()
     let labels = app.state::<TrayLabels>();
     let (show, quit) = tray_labels(lang);
     labels.show.set_text(show)?;
-    labels.quit.set_text(quit)
+    labels.quit.set_text(quit)?;
+    app.state::<updates::Updates>().set_language(lang);
+    Ok(())
 }
 
 fn show_main(app: &AppHandle) {
@@ -59,6 +62,9 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec![HIDDEN_ARG]),
         ))
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_notification::init())
         .invoke_handler(tauri::generate_handler![
             ui_ready,
             commands::get_config,
@@ -67,6 +73,9 @@ pub fn run() {
             commands::get_snapshot,
             commands::import_legacy,
             commands::set_autostart,
+            updates::get_update_state,
+            updates::check_for_updates,
+            updates::install_update,
         ])
         .setup(|app| {
             let secrets: Arc<dyn config::SecretStore> = Arc::new(config::KeyringStore);
@@ -89,6 +98,7 @@ pub fn run() {
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => show_main(app),
+                    "update" => show_main(app),
                     "quit" => app.exit(0),
                     _ => {}
                 })
@@ -104,6 +114,7 @@ pub fn run() {
                 })
                 .build(app)?;
             app.manage(TrayLabels { show, quit });
+            updates::start(app.handle(), menu);
             let supervisor = runtime::Supervisor::spawn(settings.runtime_config(), secrets);
             let snapshots = supervisor.subscribe();
             let emitter = app.handle().clone();

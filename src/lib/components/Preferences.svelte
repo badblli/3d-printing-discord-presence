@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { saveConfig, setAutostart, deletePrinter, type ConfigView, type PrinterConfigView } from '../api';
+  import { saveConfig, setAutostart, deletePrinter, getUpdateState, checkForUpdates, onUpdate, type UpdateSnapshot, type ConfigView, type PrinterConfigView } from '../api';
+  import { onMount } from 'svelte';
   import { translate, type Key } from '../i18n';
   import { validAppId } from '../forms';
   import { validButtons, validTemplate } from '../card';
@@ -9,13 +10,36 @@
   export let onconfig: (value: ConfigView) => void;
   export let onedit: (printer: PrinterConfigView) => void;
   export let onadd: () => void;
+  export let initialUpdate: UpdateSnapshot | null = null;
+  export let initialTab: 'general' | 'card' | 'printers' | 'updates' = 'general';
+  let updateState = initialUpdate;
+  let updateChecking = false;
+  let updateFailure = false;
+  onMount(() => {
+    let stopped = false;
+    let received = false;
+    let unlisten: (() => void) | undefined;
+    void (async () => {
+      unlisten = await onUpdate(value => { if (!stopped) { received = true; updateState = value; } });
+      if (stopped) { unlisten(); return; }
+      const latest = await getUpdateState();
+      if (!stopped && !received) updateState = latest;
+    })().catch(() => { if (!stopped) updateFailure = true; });
+    return () => { stopped = true; unlisten?.(); };
+  });
+  async function checkUpdates() {
+    updateChecking = true; updateFailure = false;
+    try { updateState = await checkForUpdates(); }
+    catch { updateFailure = true; }
+    finally { updateChecking = false; }
+  }
   let draft = { ...config, discord: { ...config.discord, buttons: config.discord.buttons.map(button => ({ ...button })) } };
   let appId = config.discord.app_id_override ?? '';
   let busy = false;
   let failure: unknown = null;
   let saved = false;
   let invalidId = false;
-  let tab: 'general' | 'card' | 'printers' = 'general';
+  let tab: 'general' | 'card' | 'printers' | 'updates' = initialTab;
   let printerPage = 0;
   $: cardValid = validTemplate(draft.discord.details_template ?? '') && validTemplate(draft.discord.state_template ?? '') && validButtons(draft.discord.buttons);
   let removing: string | null = null;
@@ -47,9 +71,9 @@
 </script>
 
 <section class="panel preferences" aria-labelledby="preferences-title">
-  <div class="preferences-heading"><h1 id="preferences-title">{t('preferences')}</h1><div class="settings-tabs" aria-label={t('settings')}><button class:current={tab === 'general'} aria-pressed={tab === 'general'} on:click={() => tab = 'general'}>{t('general')}</button><button class:current={tab === 'card'} aria-pressed={tab === 'card'} on:click={() => tab = 'card'}>{t('cardSettings')}</button><button class:current={tab === 'printers'} aria-pressed={tab === 'printers'} on:click={() => tab = 'printers'}>{t('printers')}</button></div></div>
+  <div class="preferences-heading"><h1 id="preferences-title">{t('preferences')}</h1><div class="settings-tabs" aria-label={t('settings')}><button class:current={tab === 'general'} aria-pressed={tab === 'general'} on:click={() => tab = 'general'}>{t('general')}</button><button class:current={tab === 'card'} aria-pressed={tab === 'card'} on:click={() => tab = 'card'}>{t('cardSettings')}</button><button class:current={tab === 'printers'} aria-pressed={tab === 'printers'} on:click={() => tab = 'printers'}>{t('printers')}</button><button class:current={tab === 'updates'} aria-pressed={tab === 'updates'} on:click={() => tab = 'updates'}>{t('updates')}</button></div></div>
   {#if failure}<div class="notice danger" role="alert"><strong>{problem.title}</strong><p>{problem.hint}</p></div>{/if}
-  {#if tab !== 'printers'}
+  {#if tab === 'general' || tab === 'card'}
   <form class:general-form={tab === 'general'} on:submit|preventDefault={persist} on:input={() => saved = false} on:change={() => saved = false}>
     {#if tab === 'card'}
       <CardSettings bind:discord={draft.discord} {lang} {busy} />
@@ -67,6 +91,13 @@
     {/if}
     <div class="actions"><span role="status">{saved ? t('saved') : ''}</span><button class="primary" disabled={busy || !cardValid}>{t(busy ? 'saving' : 'save')}</button></div>
   </form>
+  {/if}
+  {#if tab === 'updates'}
+    <div class="update-settings">
+      <div class="toggle-row"><strong>{t('currentVersion')}</strong><span>v{updateState?.current_version ?? '—'}</span></div>
+      <div class="toggle-row"><strong>{t('lastUpdateCheck')}</strong><span>{updateState?.last_checked_ms ? new Date(updateState.last_checked_ms).toLocaleString(lang === 'tr' ? 'tr-TR' : 'en-US') : t('neverChecked')}</span></div>
+      <div class="actions"><span role="status">{updateFailure || updateState?.status.state === 'error' ? t('updateCheckFailed') : updateState?.status.state === 'available' ? `${t('updateAvailable')} v${updateState.status.version}` : updateState?.status.state === 'idle' && updateState.last_checked_ms ? t('upToDate') : ''}</span><button class="primary" disabled={updateChecking || updateState?.status.state === 'checking' || updateState?.status.state === 'downloading'} on:click={checkUpdates}>{updateChecking || updateState?.status.state === 'checking' ? t('updateChecking') : t('checkNow')}</button></div>
+    </div>
   {/if}
   {#if tab === 'printers'}
   <div class="section-heading"><h2>{t('printers')}</h2><button disabled={busy} on:click={onadd}>{t('add')}</button></div>

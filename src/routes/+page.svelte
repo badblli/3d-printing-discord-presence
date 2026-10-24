@@ -10,6 +10,7 @@
   import PrinterWizard from '$lib/components/PrinterWizard.svelte';
   import PrinterCard from '$lib/components/PrinterCard.svelte';
   import Preferences from '$lib/components/Preferences.svelte';
+  import UpdateBanner from '$lib/components/UpdateBanner.svelte';
   import '$lib/theme.css';
 
   let config: ConfigView | null = null;
@@ -74,6 +75,7 @@
     {#if loading}<section class="panel empty" role="status"><img src={logo} alt="" width="96" height="96" /><p>{t('loading')}</p></section>
     {:else if failure}<section class="panel empty" role="alert"><h1>{problem.title}</h1><p>{problem.hint}</p><button class="primary" on:click={initialize}>{t('retry')}</button></section>
     {:else if config && snapshot}
+      <UpdateBanner {lang} />
       {#if snapshot.recovered_corrupt}<div class="notice" role="status">{t('recovered')}</div>{/if}
       {#if wizard}<PrinterWizard {config} {snapshot} {editing} onconfig={update} onclose={() => { wizard = false; editing = null; view = 'status'; }} />
       {:else if view === 'settings'}<Preferences {config} onconfig={update} onedit={add} onadd={() => add()} />
