@@ -1,9 +1,20 @@
 .venv/
 __pycache__/
-build/
+/build/
+/src-tauri/target/
 dist/
 *.spec
 connected.png
 .env
 .env.*
 !.env.example
+
+# agent-crew
+.crew/state/
+
+# Tauri / web
+node_modules/
+/.svelte-kit/
+/package/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*

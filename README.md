@@ -1,92 +1,110 @@
 <div align="center">
 
+<img src="assets/brand/logo.png" alt="3D Printing logosu" width="140">
+
 # 3D Printing
 
-### Baskı ilerlemen Discord’da. Yazıcın kendi LAN’ında kalır.
+### Baskı ilerlemen Discord profilinde. Yazıcın kendi ağında kalır.
 
-**Bambu Lab A1 Combo için Windows Rich Presence uygulaması**
-
+[![Son sürüm](https://img.shields.io/github/v/release/badblli/3d-printing-discord-presence?style=flat-square&color=52dda0)](https://github.com/badblli/3d-printing-discord-presence/releases/latest)
 ![Windows](https://img.shields.io/badge/platform-Windows-34435e?style=flat-square)
-![A1 Combo](https://img.shields.io/badge/printer-A1%20Combo-52dda0?style=flat-square)
+![Bambu Lab](https://img.shields.io/badge/yaz%C4%B1c%C4%B1-Bambu%20Lab-52dda0?style=flat-square)
 ![MIT](https://img.shields.io/github/license/badblli/3d-printing-discord-presence?style=flat-square)
 
-<img src="assets/app-icon-maker-pixel-v2.gif" alt="Göz kırpan piksel art maker maskotu" width="190">
+**[⬇ Windows için indir](https://github.com/badblli/3d-printing-discord-presence/releases/latest)** · [English](#english)
 
 </div>
 
 ## Ne işe yarar?
 
-Baskı sürerken Discord profilinde dosya adını (isteğe bağlı), ilerleme yüzdesini ve kalan süre tahminini gösterir. Baskı aktif değilse durum kartı gizlenir.
+3D yazıcın baskı alırken Discord profilinde canlı bir kart gösterir:
 
-Uygulama yazıcı durumunu yerel ağdan okur. Bambu hesabına giriş yapmaz ve yazıcıya başlatma/durdurma komutu göndermez.
+- **Yazıcı modeli ve fotoğrafı** (ör. Bambu Lab A1)
+- **İlerleme yüzdesi**, durum rozeti (basılıyor / hazırlanıyor / duraklatıldı)
+- **Kalan süre**, Discord'un kendi geri sayımıyla
+- İsteğe bağlı **dosya adı**, katman ve sıcaklık bilgisi, en fazla 2 bağlantı düğmesi
+
+Baskı bitince ya da yazıcı boştayken kart kendiliğinden kaybolur. Uygulama arka planda, sistem tepsisinde sessizce çalışır.
 
 ## Kurulum
 
-Windows bilgisayar, A1 Combo ve Discord masaüstü uygulaması aynı yerel ağda olmalı.
+1. [Son sürümü](https://github.com/badblli/3d-printing-discord-presence/releases/latest) indir: `3D Printing_x.y.z_x64-setup.exe`.
+2. Kurulum dosyasını aç. Yönetici izni istemez.
+   Windows "Bilinmeyen yayıncı" uyarısı gösterebilir; **Ek bilgi → Yine de çalıştır** de (uygulama henüz ücretli bir kod imzalama sertifikasıyla imzalanmadı).
+3. Uygulama açılınca kurulum sihirbazı yazıcını ekletir. Eski Python sürümünü kullandıysan ayarlarını tek tıkla içe aktarabilirsin.
+4. Discord'da **Kullanıcı Ayarları → Etkinlik Gizliliği** bölümünden etkinlik paylaşımının açık olduğundan emin ol.
 
-1. Uygulamayı açın ve bağlantı bilgilerini girin.
-2. Discord’da **Kullanıcı Ayarları → Etkinlik Gizliliği** bölümünden etkinlik paylaşımını açın.
-3. **Kaydet ve başlat**’a basın.
+Discord Developer Portal'a girmen, bot oluşturman ya da token girmen **gerekmez**.
 
-### Bağlantı bilgileri
+### Yazıcı bilgileri nerede?
 
 | Alan | Nereden bulunur? |
 | --- | --- |
-| Yazıcı IP adresi | Yazıcı ekranı → **Ayarlar → WLAN / Ağ** |
-| Yazıcı seri numarası | **Ayarlar → Cihaz bilgisi**. AMS seri numarası değil. |
-| LAN erişim kodu | **Ayarlar → WLAN / Ağ → LAN erişim kodu**. Bambu hesabı parolanız değil. |
-| Discord Application ID | [Developer Portal](https://discord.com/developers/applications) → uygulamanız → **General Information → Application ID** |
+| IP adresi | Yazıcı ekranı → **Ayarlar → WLAN / Ağ** |
+| Seri numarası | **Ayarlar → Cihaz bilgisi** (AMS seri numarası değil) |
+| LAN erişim kodu | **Ayarlar → WLAN / Ağ → LAN erişim kodu** (Bambu hesap parolan değil) |
 
-Yeni Discord uygulaması oluşturmanız gerekmez; Rich Presence için kullandığınız uygulamanın Application ID’si yeterlidir. Bot oluşturmayın ve Discord token’ı girmeyin.
+Yazıcı ve bilgisayar aynı yerel ağda olmalı. Bazı yeni Bambu firmware'leri üçüncü taraf uygulamalar için **LAN Only** veya **Developer Mode** isteyebilir.
 
-Pencerenin **X** düğmesi uygulamayı bildirim alanına küçültür; RPC çalışmayı sürdürür. Tamamen çıkarsanız Discord durumu da kapanır. Uygulamayı yeniden açtığınızda ayarlarınız Windows hesabınız için şifrelenmiş olarak yüklenir.
+## Özellikler
 
-## Görsel kimlik
+- **Desteklenen yazıcılar:** Bambu Lab yazıcıları yerel ağ üzerinden (A1, A1 mini, P1P, P1S, X1 Carbon, X1E, H2D…; gerçek cihazda test edilen: A1 Combo). Klipper/Moonraker, OctoPrint ve PrusaLink yakında.
+- **Kart ayarları:** üst ve alt satır için şablonlar (`{model} · {status} · %{progress}` gibi), canlı önizleme, Türkçe/İngilizce.
+- **Tepside çalışma:** pencereyi kapatınca uygulama tepside çalışmaya devam eder; istersen bilgisayar açılınca otomatik başlar.
+- **Otomatik güncelleme:** yeni sürüm çıkınca uygulama içinde (pencere kapalıysa Windows bildirimiyle) haber verir; tek tıkla güncellenir. Güncellemeler imzalıdır, yalnızca bu projenin anahtarıyla imzalanmış sürümler kurulur.
 
-Discord uygulama kartı için [animasyonlu PNG/GIF simgesi](assets/app-icon-maker-pixel-v2.gif), Windows uygulaması için statik [PNG](assets/app-icon-maker-pixel-v2.png) ve [ICO](assets/app-icon-maker-pixel-v2.ico) bulunur. GIF; 1024×1024, 3 kare ve 10 MB sınırının altındadır. Developer Portal’da **General Information → App Icon** alanına yükleyebilirsiniz.
+## Gizlilik
 
-## Gizlilik ve ağ
+- Uygulama yazıcıyı **yalnızca okur**: başlat/durdur gibi hiçbir komut göndermez, Bambu hesabına giriş yapmaz.
+- Yazıcıyla bağlantı yerel ağda, Bambu'nun sertifikasıyla doğrulanan TLS üzerinden kurulur.
+- LAN erişim kodu Windows Kimlik Bilgisi Yöneticisi'nde saklanır; ayar dosyasına yazılmaz.
+- Discord'a yalnızca kartta gördüğün bilgiler (model, durum, yüzde, kalan süre ve açıksa dosya adı) gider. Kart, kendi bilgisayarındaki Discord uygulamasına yerel olarak iletilir; arada sunucu yoktur.
+- Güncelleme denetimi için GitHub Releases'a bağlanılır.
 
-- LAN erişim kodu `%LOCALAPPDATA%/BambuDiscord/settings.json` içinde Windows DPAPI ile şifrelenir.
-- Yazıcı IP’si, seri numarası ve Application ID yalnızca bu bilgisayarda tutulur.
-- Discord’a baskı durumu, yüzde, süre tahmini ve dosya adı paylaşımı açıksa dosya adı gönderilir.
-- TLS bağlantısı Bambu CA sertifikasını doğrular. Uygulama yazıcıyı kontrol etmez.
-- Ağ yalıtımı, değişen IP adresi, kapalı LAN erişimi veya firmware farkları bağlantıyı engelleyebilir. **LAN Only** seçeneği Bambu Handy/bulut bağlantısını kapatabilir; uygulama bu modu değiştirmez.
+## Sık sorulanlar
 
-Paket içindeki `bambu.cert`, [HA-Bambulab](https://github.com/greghesp/ha-bambulab) projesinin dağıttığı Bambu CA sertifikasıdır. Bağlantı ve komut uygulaması için kaynaklar README’nin İngilizce bölümünde listelenmiştir.
+**Herkes aynı Discord uygulamasını mı kullanıyor, kartlar karışır mı?**
+Hayır. Kartı herkesin kendi bilgisayarındaki Discord ayarlar; uygulama kimliği yalnızca kartta görünen ad ve ikonu belirler. Aynı oyunu oynayan binlerce kişi gibi düşün.
 
-## Kaynaktan çalıştırma
+**Kart görünmüyor.**
+Discord masaüstü uygulaması aynı bilgisayarda açık olmalı ve Etkinlik Gizliliği'nde paylaşım açık olmalı. Uygulamadaki Discord önizlemesi kartın nasıl görüneceğini gösterir.
 
-Python 3.12 ve Windows:
+**Kendi Discord uygulamamın adını kullanmak istiyorum.**
+Ayarlar → Gelişmiş → Application ID alanına kendi uygulamanın kimliğini yazabilirsin.
+
+## Geliştirme
+
+Uygulama [Tauri v2](https://tauri.app) ile yazıldı: arka plan servisi Rust, arayüz Svelte.
 
 ```powershell
-python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements.txt
-.venv/Scripts/python app.py
+npm ci
+npm run tauri dev      # geliştirme
+npm run lint; npm test # arayüz kontrolleri
+cargo test --manifest-path src-tauri/Cargo.toml
+npm run tauri build -- --bundles nsis   # kurulum dosyası
 ```
 
-Tek dosya EXE oluşturmak için:
+Gereksinimler: Node 22, Rust (stable), Windows'ta Visual Studio Build Tools (C++). Yayın adımları için [RELEASING.md](RELEASING.md), yol haritası için [docs/ROADMAP.md](docs/ROADMAP.md).
 
-```powershell
-.venv/Scripts/python -m pip install pyinstaller==6.16.0
-.venv/Scripts/python -m PyInstaller --noconfirm --onefile --windowed --name 3DPrinting --icon assets/app-icon-maker-pixel-v2.ico --add-data "bambu.cert;." --add-data "assets/app-icon-maker-pixel-v2.png;assets" app.py
-```
+Eski Python/tkinter sürümü (`app.py`, `core.py`) yeni sürüm yaygınlaşınca kaldırılacak.
 
 ## English
 
 <details>
 <summary>Read the English overview</summary>
 
-Show Bambu Lab A1 Combo print progress as Discord Rich Presence on Windows. The app reads telemetry over your local network, does not sign in to Bambu Cloud, and sends no printer control commands.
+**3D Printing** shows your 3D printer's live progress on your Discord profile: printer model and photo, progress, a status badge, Discord's own countdown for the remaining time, and optionally the file name, layer and temperatures. The card disappears when the printer is idle. The app runs quietly in the system tray.
 
-Enter the printer IP, printer serial number (not the AMS serial), LAN access code and Discord Application ID. Enable activity sharing in Discord under **User Settings → Activity Privacy**, then press **Save and start**. You can reuse an existing Discord application; no bot or token is needed.
+**Install:** download `3D Printing_x.y.z_x64-setup.exe` from the [latest release](https://github.com/badblli/3d-printing-discord-presence/releases/latest). No admin rights are needed. Windows may show an "Unknown publisher" warning because the installer is not code-signed yet. The setup wizard adds your printer (IP, serial number and LAN access code from the printer's screen). No Discord developer account, bot or token is required.
 
-Closing the window minimizes the app to the notification area and keeps RPC running. Choosing **Quit completely** stops the Discord activity. The LAN code is encrypted with Windows DPAPI for the current Windows account. Only print status, progress, estimated time and (if enabled) the file name are sent to Discord.
+**Printers:** Bambu Lab printers over the local network today; Klipper/Moonraker, OctoPrint and PrusaLink are planned.
 
-The app requests a printer status snapshot once per minute and validates TLS with the bundled Bambu CA certificate. It never sends start/stop commands. Firmware settings and network isolation can affect local connectivity.
+**Privacy:** read-only, no printer commands, no Bambu cloud login. TLS is verified against Bambu's CA. The LAN access code is stored in Windows Credential Manager. Only what you see on the card is sent to your local Discord client. Updates are signed and fetched from GitHub Releases.
 
-The bundled `bambu.cert` is distributed by [HA-Bambulab](https://github.com/greghesp/ha-bambulab/blob/main/custom_components/bambu_lab/pybambu/certs/bambu.cert). Implementation references: [MQTT client](https://github.com/greghesp/ha-bambulab/blob/main/custom_components/bambu_lab/pybambu/bambu_client.py), [command definitions](https://github.com/greghesp/ha-bambulab/blob/main/custom_components/bambu_lab/pybambu/commands.py), and [pypresence](https://github.com/qwertyquerty/pypresence).
-
-This project is licensed under the MIT License. Third-party dependencies and the Bambu CA certificate retain their respective licenses and ownership.
+**Development:** Tauri v2 (Rust + Svelte). See the commands above, [RELEASING.md](RELEASING.md) and [docs/ROADMAP.md](docs/ROADMAP.md).
 
 </details>
+
+## Lisans ve kaynaklar
+
+MIT lisansı. Paketteki `bambu.cert`, [HA-Bambulab](https://github.com/greghesp/ha-bambulab) projesinin dağıttığı Bambu CA sertifikasıdır. Yazıcı görselleri [BambuStudio](https://github.com/bambulab/BambuStudio) deposundan bağlantıyla gösterilir ve sahiplerine aittir. Üçüncü taraf bağımlılıklar kendi lisanslarına tabidir.
