@@ -1,6 +1,12 @@
 import type { Lang } from '../api';
 
 export const tr = {
+  minimize: 'Küçült', hideToTray: 'Tepsiye gizle', general: 'Genel', cardSettings: 'Discord kartı',
+  detailsTemplate: 'Üst satır', stateTemplate: 'Alt satır', resetTemplates: 'Varsayılana dön',
+  templateHint: 'Yer tutucuyu son odaklandığın satıra ekle.', invalidTemplate: 'Geçerli bir yer tutucu kullan; süslü parantezleri kapat.',
+  statusBadge: 'Durum rozeti', buttonLabel: 'Etiket', buttonUrl: 'HTTPS bağlantısı', addButton: 'Bağlantı ekle', removeButton: 'Bağlantıyı kaldır',
+  buttonsHint: 'En fazla 2 düğme. Düğmeleri sadece başkaları görür.', invalidButtons: 'Etiket 1–32 karakter olmalı. Kimlik bilgisi içermeyen geçerli bir HTTPS bağlantısı gir.',
+  samplePreview: 'Örnek verilerle canlı önizleme', previous: 'Önceki', pageNext: 'Sonraki',
   app: '3D Printing', tagline: 'Atölyenden profiline.', status: 'Durum', settings: 'Ayarlar',
   loading: 'Atölyen hazırlanıyor…', retry: 'Yeniden dene', close: 'Kapat', back: 'Geri', next: 'Devam et',
   save: 'Kaydet', saving: 'Kaydediliyor…', cancel: 'Vazgeç', edit: 'Düzenle', remove: 'Sil',
@@ -52,6 +58,12 @@ export const tr = {
 
 export type Key = keyof typeof tr;
 export const en: Record<Key, string> = {
+  minimize: 'Minimize', hideToTray: 'Hide to tray', general: 'General', cardSettings: 'Discord card',
+  detailsTemplate: 'Top line', stateTemplate: 'Bottom line', resetTemplates: 'Reset to default',
+  templateHint: 'Insert a placeholder into the last focused line.', invalidTemplate: 'Use a supported placeholder and close all braces.',
+  statusBadge: 'Status badge', buttonLabel: 'Label', buttonUrl: 'HTTPS link', addButton: 'Add link', removeButton: 'Remove link',
+  buttonsHint: 'Up to 2 buttons. Only other people can see the buttons.', invalidButtons: 'Labels must have 1–32 characters. Enter a valid HTTPS link without credentials.',
+  samplePreview: 'Live preview with sample data', previous: 'Previous', pageNext: 'Next',
   app: '3D Printing', tagline: 'From workshop to profile.', status: 'Status', settings: 'Settings',
   loading: 'Preparing your workshop…', retry: 'Try again', close: 'Close', back: 'Back', next: 'Continue',
   save: 'Save', saving: 'Saving…', cancel: 'Cancel', edit: 'Edit', remove: 'Delete',
