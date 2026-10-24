@@ -1,0 +1,16 @@
+# Logo konseptleri
+
+Altı ayrı uygulama simgesi önerisi. Her PNG şeffaf arka planlıdır; ana dosya 1024 × 1024, `-128` ve `-32` dosyaları gerçek küçültülmüş önizlemelerdir. Simge alanı merkezde tutuldu ve dairesel kırpma için en az %12 dış boşluk bırakıldı.
+
+**Üretim:** Her konsept için `imagegen` aracına ayrı bir `logo-brand` istemi gönderildi. İstemlerin ortak kısmı: “Cross-brand 3D printer progress desktop app icon; square transparent PNG; crisp flat vector-like shape, bold silhouette readable at 32 px; artwork within a centered circle with at least 12% clear padding; no text, letters, numbers, watermarks, Discord logo or printer brand marks; readable on #0d1117 and #ffffff.” Aşağıdaki ayırt edici konu ve palet her ayrı isteme eklendi. Çıktılar Pillow ile şeffaf içerik sınırına göre ortalanıp 1024 × 1024 tuvale yerleştirildi; küçük dosyalar `Image.Resampling.LANCZOS` ile üretildi.
+
+| Konsept | Fikir ve isteme eklenen konu | Palet | Koyu / açık zemin |
+| --- | --- | --- | --- |
+| [1 · Katman adaları](1-katman-adalari.png) | Üste doğru yükselen üç kalın, organik kontur adası; katmanlı üretimi jeolojik bir heykel gibi anlatır. İstem: “Three thick offset rounded triangular contour islands, broad gaps, minimal topographic stack.” | `#123D3A` · `#52DDA0` · `#DDF8A8` | Koyuda açık üst katman öne çıkar; açıkta koyu taban sınırı korur. |
+| [2 · İlerleme yörüngesi](2-ilerleme-yorungesi.png) | Açık bir ilerleme halkası, ortasında baskı ucu ve uçta tek durum noktası. İstem: “Bold open circular progress arc around a compact print nozzle; one amber round terminal; precise instrument-like icon.” | `#16324F` · `#3478F6` · `#FFBE55` | Koyuda mavi halka parlak; açıkta lacivert çerçeve kontrastı sağlar. |
+| [3 · Canlı uç](3-canli-uc.png) | Baskı ucuna eklenen tek yeşil nokta, etkinlik durumunu sakin bir işaretle gösterir. İstem: “Chunky chamfered coral print nozzle tapering downward; one mint live-status dot on upper-right shoulder; dark outline.” | `#202B35` · `#F47755` · `#52DDA0` | Koyuda mercan gövde belirgin; açıkta koyu dış çizgi okunur. |
+| [4 · Filament yolu](4-filament-yolu.png) | Bir kez kendi üzerinden geçen kıvrımlı ekstrüzyon yolu, filament hareketini tek çizgi fikriyle anlatır. İstem: “One continuous thick open filament cord, a single over-under crossing and two rounded ends, modernist line emblem.” | `#35263E` · `#CB3970` · `#FFBE98` | Koyuda kayısı rengi çizgi; açıkta erik rengi kenar konturu çalışır. |
+| [5 · Voxel yapı](5-voxel-yapi.png) | Üç bloktan oluşan basamaklı izometrik yapı, nesnenin parça parça oluşmasını gösterir. İstem: “Compact stepped isometric sculpture of three joined chunky blocks, one raised; clean solid faces, no wireframe.” | `#16434B` · `#22B8B0` · `#BDEEE6` · `#FFD06A` | Koyuda açık yüzler, açıkta koyu blok kenarları ayrışır. |
+| [6 · Makara dostu](6-makara-dostu.png) | Yüzü ve kısa ayakları olan olgun bir filament makarası; maskot seçeneği. İstem: “Friendly mature front-facing filament spool creature; two oval eyes on cream panel, short feet, one curved filament tail; restrained industrial mascot.” | `#403127` · `#DDA448` · `#FFF0CF` | Koyuda krem yüz ve sarı makara görünür; açıkta kahverengi dış hat sınır verir. |
+
+Önizleme dosyaları aynı adın `-128.png` ve `-32.png` sonekli halleridir. Son seçim ürün sahibine aittir.
