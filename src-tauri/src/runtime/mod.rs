@@ -342,6 +342,10 @@ impl Session {
                             Lang::En => "en",
                         }
                         .into(),
+                        details_template: config.discord.details_template.clone(),
+                        state_template: config.discord.state_template.clone(),
+                        show_status_badge: config.discord.show_status_badge,
+                        buttons: config.discord.buttons.clone(),
                     },
                     now_ms() / 1000,
                 )

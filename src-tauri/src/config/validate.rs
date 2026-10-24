@@ -5,6 +5,7 @@ use serde::Serialize;
 use tauri::Url;
 
 use super::model::{AppConfig, PrinterConnection, CONFIG_VERSION};
+use crate::presence::template;
 
 /// Codes only: neither errors nor their Debug output contain user input.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, thiserror::Error)]
@@ -30,6 +31,16 @@ pub enum ValidationError {
     NonLocalAddress,
     #[error("invalid_app_id")]
     InvalidAppId,
+    #[error("invalid_details_template")]
+    InvalidDetailsTemplate,
+    #[error("invalid_state_template")]
+    InvalidStateTemplate,
+    #[error("too_many_buttons")]
+    TooManyButtons,
+    #[error("invalid_button_label")]
+    InvalidButtonLabel,
+    #[error("invalid_button_url")]
+    InvalidButtonUrl,
 }
 
 fn local_ipv4(ip: Ipv4Addr) -> bool {
@@ -137,6 +148,45 @@ pub fn validate_config(config: &AppConfig) -> Result<(), ValidationError> {
     if let Some(id) = &config.discord.app_id_override {
         if !(17..=22).contains(&id.len()) || !id.bytes().all(|c| c.is_ascii_digit()) {
             return Err(ValidationError::InvalidAppId);
+        }
+    }
+    if config
+        .discord
+        .details_template
+        .as_deref()
+        .is_some_and(|s| template::validate(s).is_err())
+    {
+        return Err(ValidationError::InvalidDetailsTemplate);
+    }
+    if config
+        .discord
+        .state_template
+        .as_deref()
+        .is_some_and(|s| template::validate(s).is_err())
+    {
+        return Err(ValidationError::InvalidStateTemplate);
+    }
+    if config.discord.buttons.len() > 2 {
+        return Err(ValidationError::TooManyButtons);
+    }
+    for button in &config.discord.buttons {
+        if button.label.trim().is_empty()
+            || !(1..=32).contains(&button.label.chars().count())
+            || button.label.chars().any(char::is_control)
+        {
+            return Err(ValidationError::InvalidButtonLabel);
+        }
+        if !button.url.starts_with("https://")
+            || button
+                .url
+                .chars()
+                .any(|c| c.is_whitespace() || c.is_control() || c == '\\')
+        {
+            return Err(ValidationError::InvalidButtonUrl);
+        }
+        let url = Url::parse(&button.url).map_err(|_| ValidationError::InvalidButtonUrl)?;
+        if url.host_str().is_none() || !url.username().is_empty() || url.password().is_some() {
+            return Err(ValidationError::InvalidButtonUrl);
         }
     }
     Ok(())

@@ -177,16 +177,23 @@ async fn restart_waits_for_old_source_and_shutdown_cleans_up() {
     assert!(snapshot.activity.unwrap().state.contains("Printing"));
     config.lang = Lang::Tr;
     config.discord.show_file_name = false;
+    config.discord.details_template = Some("{file} · {remaining}".into());
+    config.discord.state_template = Some("{model} · {status} · {layer}/{total_layers}".into());
+    config.discord.show_status_badge = false;
+    config.discord.buttons = vec![crate::config::model::Button {
+        label: "Fake link".into(),
+        url: "https://example.com/model".into(),
+    }];
     supervisor
         .reconfigure(runtime_config(config.clone()))
         .await
         .unwrap();
     let snapshot = wait_for(&supervisor, |snapshot| snapshot.activity.is_some()).await;
-    assert_eq!(
-        snapshot.activity.as_ref().unwrap().details,
-        "3D baskı alıyorum"
-    );
-    assert!(snapshot.activity.unwrap().state.contains("Basılıyor"));
+    let activity = snapshot.activity.unwrap();
+    assert_eq!(activity.details, "3D baskı alıyorum · 1 dk");
+    assert_eq!(activity.state, "A1 Combo · Basılıyor · 4/10");
+    assert_eq!(activity.assets.small_image, None);
+    assert_eq!(activity.buttons, config.discord.buttons);
     assert_eq!(starts.load(Ordering::SeqCst), 2);
     assert_eq!(stops.load(Ordering::SeqCst), 1);
     assert_eq!(overlap.load(Ordering::SeqCst), 0);

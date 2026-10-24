@@ -26,6 +26,15 @@ export interface DiscordConfig {
   enabled: boolean;
   show_file_name: boolean;
   app_id_override: string | null;
+  details_template: string | null;
+  state_template: string | null;
+  show_status_badge: boolean;
+  buttons: DiscordButton[];
+}
+
+export interface DiscordButton {
+  label: string;
+  url: string;
 }
 
 export interface AppConfig {
@@ -67,7 +76,9 @@ export interface PrintStatus {
 export interface Activity {
   details: string;
   state: string;
-  assets: { large_image: string; large_text: string };
+  assets: { large_image: string; large_text: string; small_image?: string; small_text?: string };
+  /** Discord displays custom buttons to other viewers; the card owner cannot see their own buttons. */
+  buttons?: DiscordButton[];
   /** Rust omits absent timestamps instead of returning null. */
   timestamps?: { end: number };
 }
