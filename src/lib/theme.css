@@ -24,7 +24,7 @@ h1 { font-size: 24px; letter-spacing: -.7px; line-height: 1.2; }
 h2 { font-size: 16px; line-height: 1.4; }
 p { color: var(--muted); line-height: 1.5; font-size: 13px; }
 small { color: var(--muted); font-size: 12px; }
-img { image-rendering: pixelated; object-fit: contain; }
+img { object-fit: contain; }
 .app-shell { max-width: 1120px; margin: auto; padding: 0 24px 14px; }
 header { height: 88px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); gap: 12px; }
 .brand, .activity-row { display: flex; align-items: center; gap: 12px; }
