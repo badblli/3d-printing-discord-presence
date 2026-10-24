@@ -7,3 +7,6 @@ connected.png
 .env
 .env.*
 !.env.example
+
+# agent-crew
+.crew/state/
