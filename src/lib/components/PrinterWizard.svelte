@@ -1,5 +1,5 @@
 <script lang="ts">
-  import mascot from '../assets/mascot.png';
+  import logo from '../assets/logo.png';
   import { onDestroy, tick } from 'svelte';
   import { saveConfig, importLegacy, getSnapshot, type ConfigView, type Snapshot, type PrinterConfigView, type Lang } from '../api';
   import { translate, type Key } from '../i18n';
@@ -81,7 +81,7 @@
   {#if failure}<div class="notice danger" role="alert"><strong>{problem.title}</strong><p>{problem.hint}</p></div>{/if}
 
   {#if step === 0}
-    <div class="welcome"><img src={mascot} alt="" width="96" height="96" /><div><p class="eyebrow">{t('app')}</p><h1 id="wizard-title">{t('welcome')}</h1><p>{t('intro')}</p></div></div>
+    <div class="welcome"><img src={logo} alt="" width="96" height="96" /><div><p class="eyebrow">{t('app')}</p><h1 id="wizard-title">{t('welcome')}</h1><p>{t('intro')}</p></div></div>
     {#if snapshot.legacy_available}<div class="notice"><p>{t('legacy')}</p><button disabled={busy} on:click={migrate}>{t('import')}</button></div>{/if}
     <h2>{t('choose')}</h2><p>{t('chooseHint')}</p>
     <div class="type-grid">
@@ -114,14 +114,14 @@
   {:else if step === 2}
     <h1 id="wizard-title">{t('testTitle')}</h1><p>{t('testHint')}</p>
     <div class="test-result" aria-live="polite">
-      <img src={mascot} alt="" width="88" height="88" />
+      <img src={logo} alt="" width="88" height="88" />
       {#if connection?.state === 'connected'}<h2 class="mint">{t('success')}</h2>
       {:else if connection?.state === 'error'}{@const message = errorMessage(connection.error, lang)}<h2>{message.title}</h2><p>{message.hint}</p>
       {:else}<h2>{t(timedOut ? 'testPending' : 'testing')}</h2>{/if}
     </div>
     <div class="actions"><button on:click={() => { clearTimeout(timer); step = 1; }}>{t('edit')}</button><button class="primary" on:click={() => step = 3}>{t(connection?.state === 'connected' ? 'next' : 'continueWaiting')}</button></div>
   {:else}
-    <div class="test-result"><img src={mascot} alt="" width="96" height="96" /><h1 id="wizard-title">{t('discordReminder')}</h1><p>{t('discordHelp')}</p><p class="mint">{t('discordReady')}</p></div>
+    <div class="test-result"><img src={logo} alt="" width="96" height="96" /><h1 id="wizard-title">{t('discordReminder')}</h1><p>{t('discordHelp')}</p><p class="mint">{t('discordReady')}</p></div>
     <div class="actions"><button class="primary" on:click={onclose}>{t('finish')}</button></div>
   {/if}
   {#if step === 0 && config.printers.length}<div class="actions"><button disabled={busy} on:click={onclose}>{t('cancel')}</button></div>{/if}

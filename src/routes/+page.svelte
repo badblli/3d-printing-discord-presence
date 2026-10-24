@@ -1,5 +1,5 @@
 <script lang="ts">
-  import mascot from '$lib/assets/mascot.png';
+  import logo from '$lib/assets/logo.png';
   import { onMount } from 'svelte';
   import { getConfig, getSnapshot, onSnapshot, type ConfigView, type Snapshot, type PrinterConfigView } from '$lib/api';
   import { translate, type Key } from '$lib/i18n';
@@ -52,11 +52,11 @@
 <svelte:head><title>{t('app')}</title></svelte:head>
 <div class="app-shell">
   <header>
-    <div class="brand"><img src={mascot} alt="" width="44" height="44" /><div><strong>{t('app')}</strong><small>{t('tagline')}</small></div></div>
+    <div class="brand"><img src={logo} alt="" width="44" height="44" /><div><strong>{t('app')}</strong><small>{t('tagline')}</small></div></div>
     {#if config && !wizard}<nav aria-label={t('app')}><button class:current={view === 'status'} aria-current={view === 'status' ? 'page' : undefined} on:click={() => view = 'status'}>{t('status')}</button><button class:current={view === 'settings'} aria-current={view === 'settings' ? 'page' : undefined} on:click={() => view = 'settings'}>{t('settings')}</button></nav>{/if}
   </header>
   <main>
-    {#if loading}<section class="panel empty" role="status"><img src={mascot} alt="" width="96" height="96" /><p>{t('loading')}</p></section>
+    {#if loading}<section class="panel empty" role="status"><img src={logo} alt="" width="96" height="96" /><p>{t('loading')}</p></section>
     {:else if failure}<section class="panel empty" role="alert"><h1>{problem.title}</h1><p>{problem.hint}</p><button class="primary" on:click={initialize}>{t('retry')}</button></section>
     {:else if config && snapshot}
       {#if snapshot.recovered_corrupt}<div class="notice" role="status">{t('recovered')}</div>{/if}
@@ -67,13 +67,13 @@
         <div class="dashboard">
           <div class="printer-list" aria-label={t('printers')}>
             {#each config.printers as printer (printer.id)}<PrinterCard {printer} snapshot={snapshot.printers.find(p => p.id === printer.id)} {lang} />{/each}
-            {#if !config.printers.length}<div class="panel empty"><img src={mascot} alt="" width="80" height="80" /><p>{t('intro')}</p><button class="primary" on:click={() => add()}>{t('add')}</button></div>{/if}
+            {#if !config.printers.length}<div class="panel empty"><img src={logo} alt="" width="80" height="80" /><p>{t('intro')}</p><button class="primary" on:click={() => add()}>{t('add')}</button></div>{/if}
           </div>
           <aside class="preview-column" aria-label={t('preview')}>
             <div class="preview-label"><h2>{t('preview')}</h2><p>{t('previewHint')}</p></div>
             <div class="discord-card">
-              <div class="profile-banner"></div><div class="profile-avatar"><img src={mascot} alt="" width="62" height="62" /><i></i></div>
-              <div class="activity"><p class="eyebrow">{t('playing')}</p><div class="activity-row"><img src={mascot} alt={snapshot.activity?.assets.large_text ?? ''} width="60" height="60" /><div><strong>{t('app')}</strong>{#if snapshot.activity}<p>{snapshot.activity.details}</p><p>{snapshot.activity.state}</p>{:else}<p>{t('noActivity')}</p>{/if}</div></div></div>
+              <div class="profile-banner"></div><div class="profile-avatar"><img src={logo} alt="" width="62" height="62" /><i></i></div>
+              <div class="activity"><p class="eyebrow">{t('playing')}</p><div class="activity-row"><img src={logo} alt={snapshot.activity?.assets.large_text ?? ''} width="60" height="60" /><div><strong>{t('app')}</strong>{#if snapshot.activity}<p>{snapshot.activity.details}</p><p>{snapshot.activity.state}</p>{:else}<p>{t('noActivity')}</p>{/if}</div></div></div>
             </div>
             <div class="discord-state" role="status"><span class="badge" class:online={snapshot.discord === 'connected'}><i></i>{t(discordKey)}</span>
               {#if snapshot.discord === 'no_app_id'}<p>{t('appIdHint')}</p><button on:click={() => view = 'settings'}>{t('settings')}</button>
