@@ -1,0 +1,9 @@
+# Windows sürümü yayınlama
+
+1. GitHub Actions için `TAURI_SIGNING_PRIVATE_KEY` ve `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` secret'larını, ortak Discord Application ID için `DISCORD_APP_ID` değişkenini yapılandır. Özel anahtarı repoya ekleme. Yerel imza anahtarları `%USERPROFILE%\.tauri\` altında tutulur; kaybolursa mevcut kurulumlar yeni güncellemelerin imzasını doğrulayamaz. Anahtarın ve parolasının güvenli, erişimi kısıtlı bir yedeğini ayrı yerde sakla.
+2. `npm run release:bump -- X.Y.Z` çalıştır. `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock` ve `src-tauri/tauri.conf.json` sürümlerinin aynı olduğunu kontrol et.
+3. Testleri çalıştır: `cargo test --offline --manifest-path src-tauri/Cargo.toml`, `cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings`, `npm run lint && npm test`. Yerel Windows paket denemesinde imza anahtarı ortam değişkenleri yüklüyken `npm run tauri build -- --bundles nsis` kullan; `*-setup.exe` ve updater `.sig` dosyalarını denetle.
+4. Sürüm değişikliklerini commit et. `git tag vX.Y.Z` oluştur ve branch ile etiketi push et. Etiket sürümü uygulama sürümüyle uyuşmazsa yayın işi durur.
+5. GitHub Actions → Release işinin başarılı bitmesini bekle. GitHub Releases'ta yayınlanmış `3D Printing_X.Y.Z_x64-setup.exe`, imzalı güncelleme dosyası ve `latest.json` olduğunu doğrula. Temiz bir Windows kullanıcı hesabında kurulumun yönetici izni istemediğini ve uygulama içi güncellemenin yeniden açıldığını dene. Kaldırmada “Uygulama verilerini sil” seçeneğini işaretlemeden ayarların kaldığını doğrula.
+
+NSIS kurulum dosyası için ayrıca bir Windows kod imzalama sertifikası yoktur. Bu nedenle SmartScreen “Bilinmeyen yayıncı” uyarısı gösterebilir. Updater'ın `.sig` imzası paket bütünlüğünü doğrular; Windows'un kod imzalama uyarısını kaldırmaz.

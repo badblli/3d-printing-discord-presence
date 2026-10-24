@@ -2,6 +2,7 @@ import type { Lang } from '../api';
 
 export const tr = {
   minimize: 'Küçült', hideToTray: 'Tepsiye gizle', general: 'Genel', cardSettings: 'Discord kartı',
+  updates: 'Güncellemeler', currentVersion: 'Mevcut sürüm', lastUpdateCheck: 'Son denetim', neverChecked: 'Henüz denetlenmedi', checkNow: 'Şimdi denetle', updateChecking: 'Denetleniyor…', upToDate: 'Güncel sürümü kullanıyorsun.', updateCheckFailed: 'Güncelleme denetlenemedi. Daha sonra tekrar dene.', updateAvailable: 'Yeni sürüm', updateRestart: 'Güncelle ve yeniden başlat', updateDownloading: 'Güncelleme indiriliyor', updateInstalling: 'Güncelleme kuruluyor…', updateFailed: 'Güncelleme tamamlanamadı.', updateLater: 'Sonra',
   detailsTemplate: 'Üst satır', stateTemplate: 'Alt satır', resetTemplates: 'Varsayılana dön',
   templateHint: 'Yer tutucuyu son odaklandığın satıra ekle.', invalidTemplate: 'Geçerli bir yer tutucu kullan; süslü parantezleri kapat.',
   statusBadge: 'Durum rozeti', buttonLabel: 'Etiket', buttonUrl: 'HTTPS bağlantısı', addButton: 'Bağlantı ekle', removeButton: 'Bağlantıyı kaldır',
@@ -59,6 +60,7 @@ export const tr = {
 export type Key = keyof typeof tr;
 export const en: Record<Key, string> = {
   minimize: 'Minimize', hideToTray: 'Hide to tray', general: 'General', cardSettings: 'Discord card',
+  updates: 'Updates', currentVersion: 'Current version', lastUpdateCheck: 'Last checked', neverChecked: 'Never checked', checkNow: 'Check now', updateChecking: 'Checking…', upToDate: 'You are up to date.', updateCheckFailed: 'Could not check for updates. Try again later.', updateAvailable: 'New version', updateRestart: 'Update and restart', updateDownloading: 'Downloading update', updateInstalling: 'Installing update…', updateFailed: 'Could not complete the update.', updateLater: 'Later',
   detailsTemplate: 'Top line', stateTemplate: 'Bottom line', resetTemplates: 'Reset to default',
   templateHint: 'Insert a placeholder into the last focused line.', invalidTemplate: 'Use a supported placeholder and close all braces.',
   statusBadge: 'Status badge', buttonLabel: 'Label', buttonUrl: 'HTTPS link', addButton: 'Add link', removeButton: 'Remove link',

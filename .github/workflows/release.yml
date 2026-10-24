@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      PRINT_PRESENCE_DISCORD_APP_ID: ${{ vars.DISCORD_APP_ID }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: Swatinem/rust-cache@v2.8.2
+        with:
+          workspaces: src-tauri -> target
+      - name: Check tag and package versions
+        shell: pwsh
+        run: |
+          $tagVersion = '${{ github.ref_name }}' -replace '^v', ''
+          $configVersion = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          $packageVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $cargoVersion = (Select-String -Path src-tauri/Cargo.toml -Pattern '^version = "([^"]+)"' | Select-Object -First 1).Matches.Groups[1].Value
+          if ($tagVersion -notmatch '^\d+\.\d+\.\d+$' -or $tagVersion -ne $configVersion -or $tagVersion -ne $packageVersion -or $tagVersion -ne $cargoVersion) {
+            throw 'Release tag and application versions must match.'
+          }
+      - run: npm ci
+      - uses: tauri-apps/tauri-action@v0.5.25
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 3D Printing ${{ github.ref_name }}
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          args: --bundles nsis
