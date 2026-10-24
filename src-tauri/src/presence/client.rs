@@ -437,7 +437,10 @@ mod tests {
             assets: Assets {
                 large_image: "printer".into(),
                 large_text: "Test Printer".into(),
+                small_image: None,
+                small_text: None,
             },
+            buttons: Vec::new(),
             timestamps: Some(Timestamps { end: 1120 }),
         }
     }

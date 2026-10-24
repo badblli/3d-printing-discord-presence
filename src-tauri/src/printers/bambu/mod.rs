@@ -1,4 +1,5 @@
 //! Read-only Bambu LAN MQTT telemetry. No printer control operations.
+pub mod models;
 pub mod telemetry;
 pub mod tls;
 
@@ -139,7 +140,7 @@ impl BambuSource {
                                 stale = false;
                                 if !connection(events, shutdown, ConnectionState::Connected).await { return Ok(()); }
                             }
-                            let status = telemetry.status(now.into_std(), now_ms(), self.model.as_deref());
+                            let status = telemetry.status(now.into_std(), now_ms(), Some(models::resolve(self.model.as_deref(), &self.serial)));
                             if !emit(events, shutdown, SourceEvent::Status { status }).await { return Ok(()); }
                         }
                     }

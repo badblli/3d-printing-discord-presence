@@ -1,6 +1,8 @@
 //! Local Discord IPC and pure printer-status presentation.
 pub mod activity;
 pub mod client;
+pub mod images;
+pub mod template;
 
 pub use activity::{activity_for, Activity, PresenceOptions};
 pub use client::{PresenceClient, PresenceState};

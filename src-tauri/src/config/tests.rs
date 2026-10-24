@@ -30,8 +30,90 @@ fn defaults_are_valid_and_have_no_printers() {
     assert!(value.printers.is_empty());
     assert!(value.discord.enabled);
     assert!(value.discord.app_id_override.is_none());
+    assert!(value.discord.show_status_badge);
+    assert!(value.discord.buttons.is_empty());
     assert!(!value.autostart);
     assert_eq!(validate_config(&value), Ok(()));
+}
+
+#[test]
+fn old_config_json_loads_with_new_discord_defaults() {
+    let dir = tempfile::tempdir().unwrap();
+    let json = br#"{"version":1,"printers":[],"discord":{"enabled":true,"show_file_name":false,"app_id_override":null},"autostart":false,"lang":"tr"}"#;
+    fs::write(dir.path().join("config.json"), json).unwrap();
+    let loaded = ConfigStore::new(dir.path()).load().unwrap();
+    assert!(!loaded.recovered_corrupt);
+    assert!(!loaded.config.discord.show_file_name);
+    assert_eq!(loaded.config.discord.details_template, None);
+    assert_eq!(loaded.config.discord.state_template, None);
+    assert!(loaded.config.discord.show_status_badge);
+    assert!(loaded.config.discord.buttons.is_empty());
+    assert_eq!(loaded.config.version, model::CONFIG_VERSION);
+}
+
+#[test]
+fn malformed_templates_have_distinct_redacted_error_codes() {
+    let mut value = config();
+    value.discord.details_template = Some("{unknown}".into());
+    assert_eq!(
+        validate_config(&value),
+        Err(ValidationError::InvalidDetailsTemplate)
+    );
+    assert_eq!(
+        ValidationError::InvalidDetailsTemplate.to_string(),
+        "invalid_details_template"
+    );
+    value.discord.details_template = Some("{file}".into());
+    value.discord.state_template = Some("{progress".into());
+    assert_eq!(
+        validate_config(&value),
+        Err(ValidationError::InvalidStateTemplate)
+    );
+    value.discord.state_template = Some("{model} · {status}".into());
+    assert_eq!(validate_config(&value), Ok(()));
+}
+
+#[test]
+fn discord_buttons_enforce_count_label_and_https_url() {
+    let mut value = config();
+    let button = model::Button {
+        label: "Fake link".into(),
+        url: "https://example.com/model?id=42".into(),
+    };
+    value.discord.buttons = vec![button.clone(), button.clone()];
+    assert_eq!(validate_config(&value), Ok(()));
+    value.discord.buttons.push(button.clone());
+    assert_eq!(
+        validate_config(&value),
+        Err(ValidationError::TooManyButtons)
+    );
+    value.discord.buttons = vec![button];
+    for label in ["", " ", "x\n", &"x".repeat(33), &format!(" {}", "x".repeat(32))] {
+        value.discord.buttons[0].label = label.into();
+        assert_eq!(
+            validate_config(&value),
+            Err(ValidationError::InvalidButtonLabel)
+        );
+    }
+    value.discord.buttons[0].label = "🖨".repeat(32);
+    assert_eq!(validate_config(&value), Ok(()));
+    for url in [
+        "http://example.com",
+        "javascript:alert(1)",
+        "https://",
+        "https://user:password@example.com",
+        "https://example.com\n",
+    ] {
+        value.discord.buttons[0].url = url.into();
+        assert_eq!(
+            validate_config(&value),
+            Err(ValidationError::InvalidButtonUrl)
+        );
+        assert_eq!(
+            ValidationError::InvalidButtonUrl.to_string(),
+            "invalid_button_url"
+        );
+    }
 }
 
 #[test]

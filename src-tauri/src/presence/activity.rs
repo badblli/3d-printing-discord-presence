@@ -1,5 +1,9 @@
 //! Pure conversion; no IPC, clock reads, logging or printer access.
-use crate::model::{PrintState, PrintStatus, PrinterKind};
+use super::{images, template};
+use crate::{
+    config::model::Button,
+    model::{PrintState, PrintStatus},
+};
 use serde::Serialize;
 
 #[derive(Clone, PartialEq, Eq, Serialize, Debug)]
@@ -7,6 +11,8 @@ pub struct Activity {
     pub details: String,
     pub state: String,
     pub assets: Assets,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub buttons: Vec<Button>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamps: Option<Timestamps>,
 }
@@ -15,6 +21,10 @@ pub struct Activity {
 pub struct Assets {
     pub large_image: String,
     pub large_text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub small_image: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub small_text: Option<String>,
 }
 
 #[derive(Clone, PartialEq, Eq, Serialize, Debug)]
@@ -27,6 +37,10 @@ pub struct PresenceOptions {
     pub show_file_name: bool,
     /// `en` (including regional variants); other values fall back to Turkish.
     pub lang: String,
+    pub details_template: Option<String>,
+    pub state_template: Option<String>,
+    pub show_status_badge: bool,
+    pub buttons: Vec<Button>,
 }
 
 impl Default for PresenceOptions {
@@ -34,6 +48,10 @@ impl Default for PresenceOptions {
         Self {
             show_file_name: true,
             lang: "tr".into(),
+            details_template: None,
+            state_template: None,
+            show_status_badge: true,
+            buttons: Vec::new(),
         }
     }
 }
@@ -43,48 +61,31 @@ pub fn activity_for(
     opts: &PresenceOptions,
     now_unix: u64,
 ) -> Option<Activity> {
-    let english = opts
-        .lang
-        .split(['-', '_'])
-        .next()
-        .is_some_and(|s| s.eq_ignore_ascii_case("en"));
-    let (fallback, printer, label) = match (english, status.state) {
-        (false, PrintState::Preparing) => ("3D baskı alıyorum", "3D yazıcı", "Hazırlanıyor"),
-        (false, PrintState::Printing) => ("3D baskı alıyorum", "3D yazıcı", "Basılıyor"),
-        (false, PrintState::Paused) => ("3D baskı alıyorum", "3D yazıcı", "Duraklatıldı"),
-        (true, PrintState::Preparing) => ("3D printing", "3D printer", "Preparing"),
-        (true, PrintState::Printing) => ("3D printing", "3D printer", "Printing"),
-        (true, PrintState::Paused) => ("3D printing", "3D printer", "Paused"),
-        _ => return None,
-    };
-    let details = if opts.show_file_name {
-        status
-            .file_name
+    if !status.state.is_active() {
+        return None;
+    }
+    let english = template::is_english(&opts.lang);
+    let fallback = template::fallback(english);
+    let model = template::model_name(status, english);
+    let label = template::status_label(status.state, english);
+    let details = template::render(
+        opts.details_template
             .as_deref()
-            .map(clean_file_name)
-            .filter(|s| s.chars().count() >= 2)
-    } else {
-        None
-    }
-    .unwrap_or_else(|| fallback.into());
-    let model: String = status
-        .printer_model
-        .as_deref()
-        .map(str::trim)
-        .filter(|s| s.chars().count() >= 2)
-        .unwrap_or(printer)
-        .chars()
-        .take(80)
-        .collect();
-    let mut state = format!("{model} · {label}");
-    if let Some(percent) = status.progress.filter(|percent| *percent <= 100) {
-        // Turkish writes the percent sign first.
-        if english {
-            state.push_str(&format!(" · {percent}%"));
+            .unwrap_or(template::DEFAULT_DETAILS),
+        status,
+        opts,
+        fallback,
+    );
+    let state = template::render(
+        opts.state_template.as_deref().unwrap_or(if english {
+            template::DEFAULT_STATE_EN
         } else {
-            state.push_str(&format!(" · %{percent}"));
-        }
-    }
+            template::DEFAULT_STATE_TR
+        }),
+        status,
+        opts,
+        fallback,
+    );
     // Use the observation time so repeated conversion of the same telemetry does
     // not move the deadline forward or defeat duplicate suppression.
     let timestamps = if status.state == PrintState::Printing {
@@ -106,42 +107,24 @@ pub fn activity_for(
     Some(Activity {
         details,
         state,
+        buttons: opts.buttons.clone(),
         timestamps,
         assets: Assets {
-            large_image: asset_key(status.kind).into(),
+            large_image: images::large_image(status.kind, &model),
             large_text: model,
+            small_image: opts
+                .show_status_badge
+                .then(|| images::small_image(status.state))
+                .flatten(),
+            small_text: opts.show_status_badge.then(|| label.to_owned()),
         },
     })
-}
-
-fn clean_file_name(name: &str) -> String {
-    let base = name.trim().rsplit(['/', '\\']).next().unwrap_or("").trim();
-    let lower = base.to_ascii_lowercase();
-    let suffix_len = [".gcode.3mf", ".gcode", ".3mf"]
-        .iter()
-        .find(|suffix| lower.ends_with(**suffix))
-        .map_or(0, |suffix| suffix.len());
-    base[..base.len() - suffix_len]
-        .trim()
-        .chars()
-        .take(100)
-        .collect()
-}
-
-#[allow(unreachable_patterns)] // Reserve a generic asset for future printer kinds.
-fn asset_key(kind: PrinterKind) -> &'static str {
-    match kind {
-        PrinterKind::Bambu => "bambu",
-        PrinterKind::Moonraker => "klipper",
-        PrinterKind::OctoPrint => "octoprint",
-        PrinterKind::PrusaLink => "prusa",
-        _ => "printer",
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::PrinterKind;
 
     pub(super) fn status() -> PrintStatus {
         PrintStatus {
@@ -216,10 +199,6 @@ mod tests {
         }
     }
     #[test]
-    fn unrelated_extensions_are_preserved() {
-        assert_eq!(clean_file_name("example.stl"), "example.stl");
-    }
-    #[test]
     fn missing_short_and_empty_names_use_default() {
         for name in [
             None,
@@ -255,6 +234,7 @@ mod tests {
                 &PresenceOptions {
                     show_file_name: false,
                     lang: lang.into(),
+                    ..PresenceOptions::default()
                 },
                 1000,
             )
@@ -286,17 +266,22 @@ mod tests {
         }
     }
     #[test]
-    fn each_brand_uses_its_asset() {
-        for (kind, key) in [
-            (PrinterKind::Bambu, "bambu"),
-            (PrinterKind::Moonraker, "klipper"),
-            (PrinterKind::OctoPrint, "octoprint"),
-            (PrinterKind::PrusaLink, "prusa"),
+    fn each_brand_uses_model_photo_or_app_logo() {
+        for kind in [
+            PrinterKind::Bambu,
+            PrinterKind::Moonraker,
+            PrinterKind::OctoPrint,
+            PrinterKind::PrusaLink,
         ] {
             let a = activity(&PrintStatus { kind, ..status() });
-            assert_eq!(a.assets.large_image, key);
+            assert_eq!(a.assets.large_image, images::APP_LOGO_URL);
             assert_eq!(a.assets.large_text, "Test Printer");
         }
+        let a = activity(&PrintStatus {
+            printer_model: Some("Bambu Lab A1".into()),
+            ..status()
+        });
+        assert!(a.assets.large_image.ends_with("/printer_preview_N2S.png"));
     }
     #[test]
     fn missing_and_invalid_progress_is_omitted() {
@@ -363,5 +348,29 @@ mod tests {
                 state.is_active()
             );
         }
+    }
+
+    #[test]
+    fn badge_and_buttons_are_optional_in_ipc_payload() {
+        let mut opts = PresenceOptions {
+            show_status_badge: false,
+            ..PresenceOptions::default()
+        };
+        let without = serde_json::to_value(activity_for(&status(), &opts, 1000).unwrap()).unwrap();
+        assert!(without["assets"].get("small_image").is_none());
+        assert!(without["assets"].get("small_text").is_none());
+        assert!(without.get("buttons").is_none());
+        opts.show_status_badge = true;
+        opts.buttons = vec![Button {
+            label: "Fake model".into(),
+            url: "https://example.com/model".into(),
+        }];
+        let with = serde_json::to_value(activity_for(&status(), &opts, 1000).unwrap()).unwrap();
+        assert_eq!(with["assets"]["small_text"], "Basılıyor");
+        assert!(with["assets"]["small_image"]
+            .as_str()
+            .unwrap()
+            .ends_with("/status-printing.png"));
+        assert_eq!(with["buttons"][0]["label"], "Fake model");
     }
 }
