@@ -13,7 +13,7 @@
 
 **[⬇ Windows için indir](https://github.com/badblli/plycast/releases/latest)** · [plycast.badblli.dev](https://plycast.badblli.dev) · [English](#english)
 
-<sub>Uygulama Windows'ta ve Discord kartında <b>3D Printing</b> adıyla görünür.</sub>
+<sub>Discord kartında uygulama adı <b>3D Printing</b> olarak görünür.</sub>
 
 </div>
 
@@ -30,7 +30,7 @@ Baskı bitince ya da yazıcı boştayken kart kendiliğinden kaybolur. Uygulama 
 
 ## Kurulum
 
-1. [Son sürümü](https://github.com/badblli/plycast/releases/latest) indir: `3D Printing_x.y.z_x64-setup.exe`.
+1. [Son sürümü](https://github.com/badblli/plycast/releases/latest) indir: `Plycast_x.y.z_x64-setup.exe`.
 2. Kurulum dosyasını aç. Yönetici izni istemez.
    Windows "Bilinmeyen yayıncı" uyarısı gösterebilir; **Ek bilgi → Yine de çalıştır** de (uygulama henüz ücretli bir kod imzalama sertifikasıyla imzalanmadı).
 3. Uygulama açılınca kurulum sihirbazı yazıcını ekletir. Eski Python sürümünü kullandıysan ayarlarını tek tıkla içe aktarabilirsin.
@@ -95,9 +95,9 @@ Eski Python/tkinter sürümü (`app.py`, `core.py`) yeni sürüm yaygınlaşınc
 <details>
 <summary>Read the English overview</summary>
 
-**3D Printing** shows your 3D printer's live progress on your Discord profile: printer model and photo, progress, a status badge, Discord's own countdown for the remaining time, and optionally the file name, layer and temperatures. The card disappears when the printer is idle. The app runs quietly in the system tray.
+**Plycast** shows your 3D printer's live progress on your Discord profile: printer model and photo, progress, a status badge, Discord's own countdown for the remaining time, and optionally the file name, layer and temperatures. The card disappears when the printer is idle. The app runs quietly in the system tray.
 
-**Install:** download `3D Printing_x.y.z_x64-setup.exe` from the [latest release](https://github.com/badblli/plycast/releases/latest) (website: [plycast.badblli.dev](https://plycast.badblli.dev)). No admin rights are needed. Windows may show an "Unknown publisher" warning because the installer is not code-signed yet. The setup wizard adds your printer (IP, serial number and LAN access code from the printer's screen). No Discord developer account, bot or token is required.
+**Install:** download `Plycast_x.y.z_x64-setup.exe` from the [latest release](https://github.com/badblli/plycast/releases/latest) (website: [plycast.badblli.dev](https://plycast.badblli.dev)). No admin rights are needed. Windows may show an "Unknown publisher" warning because the installer is not code-signed yet. The setup wizard adds your printer (IP, serial number and LAN access code from the printer's screen). No Discord developer account, bot or token is required.
 
 **Printers:** Bambu Lab printers over the local network today; Klipper/Moonraker, OctoPrint and PrusaLink are planned.
 

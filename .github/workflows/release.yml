@@ -39,7 +39,7 @@ jobs:
       - uses: tauri-apps/tauri-action@v0.5.25
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 3D Printing ${{ github.ref_name }}
+          releaseName: Plycast ${{ github.ref_name }}
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
