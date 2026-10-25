@@ -1,17 +1,19 @@
 <div align="center">
 
-<img src="assets/brand/logo.png" alt="3D Printing logosu" width="140">
+<img src="assets/brand/logo.png" alt="Plycast logosu" width="140">
 
-# 3D Printing
+# Plycast
 
 ### Baskı ilerlemen Discord profilinde. Yazıcın kendi ağında kalır.
 
-[![Son sürüm](https://img.shields.io/github/v/release/badblli/3d-printing-discord-presence?style=flat-square&color=52dda0)](https://github.com/badblli/3d-printing-discord-presence/releases/latest)
+[![Son sürüm](https://img.shields.io/github/v/release/badblli/plycast?style=flat-square&color=52dda0)](https://github.com/badblli/plycast/releases/latest)
 ![Windows](https://img.shields.io/badge/platform-Windows-34435e?style=flat-square)
 ![Bambu Lab](https://img.shields.io/badge/yaz%C4%B1c%C4%B1-Bambu%20Lab-52dda0?style=flat-square)
-![MIT](https://img.shields.io/github/license/badblli/3d-printing-discord-presence?style=flat-square)
+![MIT](https://img.shields.io/github/license/badblli/plycast?style=flat-square)
 
-**[⬇ Windows için indir](https://github.com/badblli/3d-printing-discord-presence/releases/latest)** · [English](#english)
+**[⬇ Windows için indir](https://github.com/badblli/plycast/releases/latest)** · [plycast.badblli.dev](https://plycast.badblli.dev) · [English](#english)
+
+<sub>Uygulama Windows'ta ve Discord kartında <b>3D Printing</b> adıyla görünür.</sub>
 
 </div>
 
@@ -28,7 +30,7 @@ Baskı bitince ya da yazıcı boştayken kart kendiliğinden kaybolur. Uygulama 
 
 ## Kurulum
 
-1. [Son sürümü](https://github.com/badblli/3d-printing-discord-presence/releases/latest) indir: `3D Printing_x.y.z_x64-setup.exe`.
+1. [Son sürümü](https://github.com/badblli/plycast/releases/latest) indir: `3D Printing_x.y.z_x64-setup.exe`.
 2. Kurulum dosyasını aç. Yönetici izni istemez.
    Windows "Bilinmeyen yayıncı" uyarısı gösterebilir; **Ek bilgi → Yine de çalıştır** de (uygulama henüz ücretli bir kod imzalama sertifikasıyla imzalanmadı).
 3. Uygulama açılınca kurulum sihirbazı yazıcını ekletir. Eski Python sürümünü kullandıysan ayarlarını tek tıkla içe aktarabilirsin.
@@ -95,7 +97,7 @@ Eski Python/tkinter sürümü (`app.py`, `core.py`) yeni sürüm yaygınlaşınc
 
 **3D Printing** shows your 3D printer's live progress on your Discord profile: printer model and photo, progress, a status badge, Discord's own countdown for the remaining time, and optionally the file name, layer and temperatures. The card disappears when the printer is idle. The app runs quietly in the system tray.
 
-**Install:** download `3D Printing_x.y.z_x64-setup.exe` from the [latest release](https://github.com/badblli/3d-printing-discord-presence/releases/latest). No admin rights are needed. Windows may show an "Unknown publisher" warning because the installer is not code-signed yet. The setup wizard adds your printer (IP, serial number and LAN access code from the printer's screen). No Discord developer account, bot or token is required.
+**Install:** download `3D Printing_x.y.z_x64-setup.exe` from the [latest release](https://github.com/badblli/plycast/releases/latest) (website: [plycast.badblli.dev](https://plycast.badblli.dev)). No admin rights are needed. Windows may show an "Unknown publisher" warning because the installer is not code-signed yet. The setup wizard adds your printer (IP, serial number and LAN access code from the printer's screen). No Discord developer account, bot or token is required.
 
 **Printers:** Bambu Lab printers over the local network today; Klipper/Moonraker, OctoPrint and PrusaLink are planned.
 

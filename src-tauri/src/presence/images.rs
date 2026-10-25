@@ -3,9 +3,9 @@
 use crate::model::{PrintState, PrinterKind};
 
 pub const ASSET_BASE_URL: &str =
-    "https://raw.githubusercontent.com/badblli/3d-printing-discord-presence/main/assets";
+    "https://raw.githubusercontent.com/badblli/plycast/main/assets";
 pub const APP_LOGO_URL: &str =
-    "https://raw.githubusercontent.com/badblli/3d-printing-discord-presence/main/assets/brand/discord-app-icon.png";
+    "https://raw.githubusercontent.com/badblli/plycast/main/assets/brand/discord-app-icon.png";
 const BAMBU_BASE_URL: &str =
     "https://raw.githubusercontent.com/bambulab/BambuStudio/master/resources/images";
 
