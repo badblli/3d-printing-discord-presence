@@ -19,7 +19,7 @@
   $: preview = {
     details: renderTemplate(details, sample, lang, discord.show_file_name),
     state: renderTemplate(state, sample, lang, discord.show_file_name),
-    assets: { large_image: logo, large_text: sample.printer_model!, small_image: discord.show_status_badge ? 'https://raw.githubusercontent.com/badblli/3d-printing-discord-presence/v2/assets/discord/status-printing.png' : undefined, small_text: t('printing') },
+    assets: { large_image: logo, large_text: sample.printer_model!, small_image: discord.show_status_badge ? 'https://raw.githubusercontent.com/badblli/3d-printing-discord-presence/main/assets/discord/status-printing.png' : undefined, small_text: t('printing') },
     buttons: discord.buttons.filter(button => validButtons([button])),
   };
   async function insert(key: string) {
