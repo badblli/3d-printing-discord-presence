@@ -204,7 +204,7 @@ pub async fn check_for_updates(app: AppHandle, state: State<'_, Updates>) -> Res
                 Lang::Tr => format!("Yeni sürüm v{version} hazır. Güncellemek için uygulamayı açın."),
                 Lang::En => format!("Version v{version} is available. Open the app to update."),
             };
-            let _ = app.notification().builder().title("3D Printing").body(body).show();
+            let _ = app.notification().builder().title("Plycast").body(body).show();
         }
     }
     Ok(state.machine.lock().unwrap().snapshot.clone())

@@ -93,7 +93,7 @@ pub fn run() {
                 .ok_or("bundled window icon missing")?;
             TrayIconBuilder::with_id("main")
                 .icon(icon)
-                .tooltip("3D Printing")
+                .tooltip("Plycast")
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {

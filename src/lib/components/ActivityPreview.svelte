@@ -22,7 +22,7 @@
         <img src={activity && failedLarge !== activity.assets.large_image ? activity.assets.large_image : logo} alt={activity?.assets.large_text ?? ''} width="64" height="64" on:error={() => failedLarge = activity?.assets.large_image ?? ''} />
         {#if activity?.assets.small_image && failedSmall !== activity.assets.small_image}<img class="status-art" src={activity.assets.small_image} alt={activity.assets.small_text ?? ''} title={activity.assets.small_text} width="22" height="22" on:error={() => failedSmall = activity?.assets.small_image ?? ''} />{/if}
       </div>
-      <div><strong>{t('app')}</strong>{#if activity}<p>{activity.details}</p><p>{activity.state}</p>{#if activity.timestamps}<p class="countdown">{countdown(activity.timestamps.end, now)} {t('remaining')}</p>{/if}{:else}<p>{t('noActivity')}</p>{/if}</div>
+      <div><strong>{t('discordApp')}</strong>{#if activity}<p>{activity.details}</p><p>{activity.state}</p>{#if activity.timestamps}<p class="countdown">{countdown(activity.timestamps.end, now)} {t('remaining')}</p>{/if}{:else}<p>{t('noActivity')}</p>{/if}</div>
     </div>
     {#if activity?.buttons?.length}<div class="preview-buttons">{#each activity.buttons as button}<div>{button.label}</div>{/each}</div>{/if}
   </div>

@@ -1,6 +1,6 @@
 {
   "name": "3d-printing-presence",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "3D printer progress as Discord Rich Presence",
   "type": "module",
   "scripts": {
