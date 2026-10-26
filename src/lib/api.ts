@@ -59,6 +59,17 @@ export interface SecretUpdate {
   secret: string;
 }
 
+/** Contains availability only; Studio credentials never cross IPC. */
+export interface DiscoveredPrinter {
+  host: string;
+  serial: string;
+  name: string;
+  model: string;
+  studio_code: boolean;
+}
+
+export const discoverPrinters = (seconds?: number): Promise<DiscoveredPrinter[]> => invoke('discover_printers', { seconds });
+
 export interface PrintStatus {
   kind: PrinterKind;
   state: PrintState;
@@ -125,13 +136,13 @@ export function onUpdate(handler: (snapshot: UpdateSnapshot) => void): Promise<U
   return listen<UpdateSnapshot>('update', event => handler(event.payload));
 }
 
-export function saveConfig(config: AppConfig, secrets: SecretUpdate[] = []): Promise<ConfigView> {
+export function saveConfig(config: AppConfig, secrets: SecretUpdate[] = [], studioSecrets: PrinterId[] = []): Promise<ConfigView> {
   // Strip the response-only flag even when the caller passes a ConfigView back.
   const input: AppConfig = {
     ...config,
     printers: config.printers.map(({ id, name, enabled, connection }) => ({ id, name, enabled, connection }))
   };
-  return invoke('save_config', { config: input, secrets });
+  return invoke('save_config', { config: input, secrets, studioSecrets });
 }
 
 export const deletePrinter = (id: PrinterId): Promise<ConfigView> => invoke('delete_printer', { id });

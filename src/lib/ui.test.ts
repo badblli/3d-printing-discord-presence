@@ -18,6 +18,11 @@ describe('printer validation', () => {
   });
   it('requires an access code on creation', () => expect(validatePrinter({ ...form, secret: '' }).secret).toBe('invalidSecret'));
   it('preserves a saved secret when the field is empty', () => expect(validatePrinter({ ...form, secret: '' }, true)).toEqual({}));
+  it('allows Studio to supply the code while still validating printer details', () => {
+    expect(validatePrinter({ ...form, secret: '' }, false, true)).toEqual({});
+    expect(validatePrinter({ ...form, secret: '', host: '', serial: '' }, false, true)).toMatchObject({ host: 'invalidHost', serial: 'invalidSerial' });
+    expect(validatePrinter({ ...form, secret: '' }, false, false).secret).toBe('invalidSecret');
+  });
   it.each(['short', '1234567!', '123456789', '1234567 '])('rejects an invalid replacement code', secret => {
     expect(validatePrinter({ ...form, secret }, true).secret).toBe('invalidSecret');
   });
@@ -50,10 +55,17 @@ describe('localized safe errors', () => {
     expect(errorMessage('secret_store_unavailable', 'en').title).toBe(en.storageTitle);
     expect(errorMessage('legacy_decryption_failed', 'tr').hint).toBe(tr.importHint);
     expect(errorMessage('autostart_update_failed', 'en').hint).toBe(en.autostartErrorHint);
+    expect(errorMessage('studio_code_missing', 'en')).toEqual({ title: en.studioMissingTitle, hint: en.studioMissingHint });
+    expect(errorMessage('studio_code_missing', 'tr')).toEqual({ title: tr.studioMissingTitle, hint: tr.studioMissingHint });
   });
 });
 
 describe('i18n completeness', () => {
+  it.each(['tr', 'en'] as const)('includes every discovery and Studio message in %s', lang => {
+    for (const key of ['discoveredPrinters', 'scanning', 'rescan', 'discoveryEmpty', 'useStudioCode', 'studioMissingTitle', 'studioMissingHint'] as const) {
+      expect(messages[lang][key].trim().length).toBeGreaterThan(0);
+    }
+  });
   it('has exactly the same keys in Turkish and English', () => expect(Object.keys(tr).sort()).toEqual(Object.keys(en).sort()));
   it.each(['tr', 'en'] as const)('has no blank messages in %s', lang => {
     for (const value of Object.values(messages[lang])) expect(value.trim().length).toBeGreaterThan(0);

@@ -1,5 +1,6 @@
 pub mod commands;
 pub mod config;
+pub mod discovery;
 pub mod model;
 pub mod presence;
 pub mod printers;
@@ -68,6 +69,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             ui_ready,
             commands::get_config,
+            commands::discover_printers,
             commands::save_config,
             commands::delete_printer,
             commands::get_snapshot,

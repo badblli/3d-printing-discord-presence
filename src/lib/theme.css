@@ -145,3 +145,35 @@ main { min-height: 0; flex: 1; padding-top: 18px; }
 .general-form .advanced, .general-form .actions { grid-column: 1 / -1; }
 .general-form .toggle-row { min-height: 64px; }
 .preferences-heading .settings-tabs button { padding: 7px 8px; }
+
+/* Discovery stays one compact shelf tall inside the fixed desktop wizard. */
+.printer-details { --discovery-height: 76px; --discovery-gap: 8px; }
+.discovery { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.discovery-heading { display: flex; justify-content: space-between; align-items: center; gap: var(--discovery-gap); margin-bottom: 6px; }
+.discovery-heading h2 { font-size: 12px; }
+.discovery-heading button { font-size: 10px; padding: 4px 8px; }
+.discovery-status p { font-size: 11px; }
+.scan-pending { display: flex; align-items: center; gap: var(--discovery-gap); min-height: 28px; }
+.scan-line { width: 46px; height: 2px; border-radius: 2px; background: var(--mint); animation: scan-pulse 1.2s ease-in-out infinite; }
+@keyframes scan-pulse { 50% { opacity: .25; transform: scaleX(.6); } }
+.discovery-cards { display: flex; gap: var(--discovery-gap); overflow-x: auto; padding: 3px; margin: -3px; scrollbar-width: thin; }
+.discovery-card { display: flex; flex-direction: column; flex: 0 0 185px; min-width: 0; height: var(--discovery-height); padding: 8px 10px; text-align: left; gap: 3px; }
+.discovery-card strong, .discovery-card small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.discovery-card strong { font-size: 12px; }
+.discovery-card small { font-size: 10px; }
+.discovery-card span { font: 11px Consolas, monospace; color: var(--muted); }
+.discovery-card.selected { background: #123d3a; border-color: var(--mint); box-shadow: inset 3px 0 var(--mint); }
+.discovery-card.selected span { color: var(--mint); }
+.wizard.printer-details .fields { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; }
+.printer-details .secret-field { grid-column: span 2; }
+.printer-details .field input:not([type=checkbox]) { padding: 7px 9px; font-size: 12px; }
+.printer-details .studio-choice { display: flex; align-items: center; gap: 7px; min-height: 31px; font-size: 11px; color: var(--mint); font-weight: 400; }
+.studio-choice input { width: 16px; height: 16px; }
+.printer-help { position: relative; margin-top: 9px; }
+.printer-help[open]>div { position: absolute; z-index: 2; bottom: 22px; left: 0; right: 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 9px; background: var(--raised); box-shadow: 0 8px 24px #0008; }
+.printer-help strong { color: #e6edf3; }
+.printer-details .invalid { font-size: 10px; }
+.printer-details>.notice { padding: 7px 10px; margin-bottom: 10px; }
+.printer-details>.notice p { font-size: 11px; }
+@media (max-width: 520px) { .wizard.printer-details .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }.printer-details .secret-field { grid-column: auto; }.printer-details .field:last-child { grid-column: 1 / -1; }.discovery-card { flex-basis: 165px; } }
+@media (prefers-reduced-motion: reduce) { .scan-line { animation: none; } }

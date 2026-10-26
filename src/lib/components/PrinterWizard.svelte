@@ -1,7 +1,7 @@
 <script lang="ts">
   import logo from '../assets/logo.png';
   import { onDestroy, tick } from 'svelte';
-  import { saveConfig, importLegacy, getSnapshot, type ConfigView, type Snapshot, type PrinterConfigView, type Lang } from '../api';
+  import { saveConfig, importLegacy, getSnapshot, discoverPrinters, type DiscoveredPrinter, type ConfigView, type Snapshot, type PrinterConfigView, type Lang } from '../api';
   import { translate, type Key } from '../i18n';
   import { validatePrinter, type PrinterForm, type FormErrors } from '../forms';
   import { errorMessage } from '../errors';
@@ -26,14 +26,45 @@
   let printerId = editing?.id ?? '';
   let timedOut = false;
   let timer: ReturnType<typeof setTimeout>;
+  let discovered: DiscoveredPrinter[] = [];
+  let scanning = false;
+  let scanStarted = false;
+  let destroyed = false;
+  let selectedSerial = '';
+  let useStudio = false;
+  $: selected = discovered.find(p => p.serial === selectedSerial && p.serial === form.serial.trim() && p.host === form.host.trim());
+  $: studioSecret = !!selected?.studio_code && useStudio;
+  $: if (!selected?.studio_code) useStudio = false;
+  $: if (step === 1 && !editing && !scanStarted) void scan();
   $: tested = snapshot.printers.find(p => p.id === printerId);
   $: connection = tested?.connection;
   $: problem = errorMessage(failure, lang);
-  onDestroy(() => { clearTimeout(timer); form.secret = ''; });
+  onDestroy(() => { destroyed = true; clearTimeout(timer); form.secret = ''; });
+
+  async function scan() {
+    if (scanning) return;
+    scanStarted = true; scanning = true;
+    try {
+      const printers = await discoverPrinters();
+      if (!destroyed) discovered = printers;
+    } catch {
+      if (!destroyed) discovered = [];
+    } finally {
+      if (!destroyed) scanning = false;
+    }
+  }
+
+  function selectPrinter(printer: DiscoveredPrinter) {
+    form = { ...form, name: form.name.trim() ? form.name : printer.name,
+      host: printer.host, serial: printer.serial, model: '', secret: '' };
+    selectedSerial = printer.serial;
+    useStudio = printer.studio_code;
+    errors = {}; failure = null;
+  }
 
   async function persist(event: SubmitEvent) {
     const element = event.currentTarget as HTMLFormElement;
-    errors = validatePrinter(form, editing?.has_secret);
+    errors = validatePrinter(form, editing?.has_secret, studioSecret);
     if (Object.keys(errors).length) {
       await tick();
       element.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus();
@@ -45,7 +76,7 @@
       const printer = { id: printerId, name: form.name.trim(), enabled: true,
         connection: { kind: 'bambu' as const, host: form.host.trim(), serial: form.serial.trim(), model: form.model.trim() || null } };
       const updated = await saveConfig({ ...config, printers: [...config.printers.filter(p => p.id !== printerId), printer] },
-        form.secret ? [{ id: printerId, secret: form.secret }] : []);
+        !studioSecret && form.secret ? [{ id: printerId, secret: form.secret }] : [], studioSecret ? [printerId] : []);
       form.secret = '';
       editing = updated.printers.find(p => p.id === printerId) ?? null;
       onconfig(updated);
@@ -71,7 +102,7 @@
   }
 </script>
 
-<section class="wizard panel" aria-labelledby="wizard-title">
+<section class="wizard panel" class:printer-details={step === 1} aria-labelledby="wizard-title">
   <div class="wizard-top">
     <div class="steps" aria-label={t('step')}>
       {#each [0, 1, 2, 3] as n}<span class:active={step >= n} aria-current={step === n ? 'step' : undefined}>{n + 1}</span>{/each}
@@ -93,22 +124,43 @@
     </div>
   {:else if step === 1}
     <h1 id="wizard-title">{t('details')}</h1><p>{t('detailsHint')}</p>
+    {#if !editing}
+      <section class="discovery" aria-labelledby="discovery-title" aria-busy={scanning}>
+        <div class="discovery-heading"><h2 id="discovery-title">{t('discoveredPrinters')}</h2><button type="button" disabled={scanning || busy} on:click={scan}>{t('rescan')}</button></div>
+        <div class="discovery-status" role="status">
+          {#if scanning}<p class="scan-pending"><span class="scan-line" aria-hidden="true"></span>{t('scanning')}</p>
+          {:else if !discovered.length}<p>{t('discoveryEmpty')}</p>{/if}
+        </div>
+        {#if discovered.length}
+          <div class="discovery-cards">
+            {#each discovered as printer (printer.serial)}
+              <button type="button" class="discovery-card" class:selected={selected?.serial === printer.serial} aria-pressed={selected?.serial === printer.serial} disabled={busy || scanning} on:click={() => selectPrinter(printer)}>
+                <strong>{printer.name || printer.model}</strong><small>{printer.model}</small><span>{printer.host}</span>
+              </button>
+            {/each}
+          </div>
+        {/if}
+      </section>
+    {/if}
     <form on:submit|preventDefault={persist} novalidate>
       <fieldset class="fields" disabled={busy} aria-label={t('details')}>
-        <div class="field full"><label for="printer-name">{t('name')}</label><input id="printer-name" bind:value={form.name} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'name-error' : undefined} maxlength="80" />{#if errors.name}<small class="invalid" id="name-error">{t(errors.name)}</small>{/if}</div>
+        <div class="field"><label for="printer-name">{t('name')}</label><input id="printer-name" bind:value={form.name} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'name-error' : undefined} maxlength="80" />{#if errors.name}<small class="invalid" id="name-error">{t(errors.name)}</small>{/if}</div>
         {#each ['host', 'serial', 'secret', 'model'] as field}
-          <div class="field">
+          <div class="field" class:secret-field={field === 'secret'}>
             <label for={'printer-' + field}>{t(field as Key)}</label>
             {#if field === 'secret'}
-              <input id="printer-secret" type="password" autocomplete="new-password" spellcheck="false" bind:value={form.secret} placeholder={editing?.has_secret ? t('stored') : ''} aria-invalid={!!errors.secret} aria-describedby={errors.secret ? 'secret-error' : undefined} />
+              {#if selected?.studio_code}
+                <label class="studio-choice"><input type="checkbox" bind:checked={useStudio} on:change={() => { form.secret = ''; errors = { ...errors, secret: undefined }; }} /> <span>{t('useStudioCode')}</span></label>
+              {/if}
+              {#if !studioSecret}<input id="printer-secret" type="password" autocomplete="new-password" spellcheck="false" bind:value={form.secret} placeholder={editing?.has_secret ? t('stored') : ''} aria-invalid={!!errors.secret} aria-describedby={errors.secret ? 'secret-error' : undefined} />{/if}
             {:else}
               <input id={'printer-' + field} bind:value={form[field as keyof PrinterForm]} spellcheck="false" autocapitalize="off" placeholder={field === 'model' ? t('automatic') : ''} aria-invalid={!!errors[field as keyof PrinterForm]} aria-describedby={errors[field as keyof PrinterForm] ? field + '-error' : undefined} />
             {/if}
             {#if errors[field as keyof PrinterForm]}<small class="invalid" id={field + '-error'}>{t(errors[field as keyof PrinterForm]!)}</small>{/if}
-            <details class="help"><summary>{t('find')}</summary><p>{t((field + 'Help') as Key)}</p></details>
           </div>
         {/each}
       </fieldset>
+      <details class="help printer-help"><summary>{t('find')}</summary><div>{#each ['host', 'serial', 'secret', 'model'] as field}<p><strong>{t(field as Key)}:</strong> {t((field + 'Help') as Key)}</p>{/each}</div></details>
       <div class="actions"><button type="button" disabled={busy} on:click={() => editing ? onclose() : step = 0}>{t(editing ? 'cancel' : 'back')}</button><button class="primary" disabled={busy}>{t(busy ? 'saving' : 'test')}</button></div>
     </form>
   {:else if step === 2}
