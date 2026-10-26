@@ -86,7 +86,7 @@ cargo test --manifest-path src-tauri/Cargo.toml
 npm run tauri build -- --bundles nsis   # kurulum dosyası
 ```
 
-Gereksinimler: Node 22, Rust (stable), Windows'ta Visual Studio Build Tools (C++). Yayın adımları için [RELEASING.md](RELEASING.md), yol haritası için [docs/ROADMAP.md](docs/ROADMAP.md).
+Gereksinimler: Node 22, Rust (stable), Windows'ta Visual Studio Build Tools (C++). Yayın adımları (Actions → Release → Run workflow) için [RELEASING.md](RELEASING.md), yol haritası için [docs/ROADMAP.md](docs/ROADMAP.md).
 
 Eski Python/tkinter sürümü (`app.py`, `core.py`) yeni sürüm yaygınlaşınca kaldırılacak.
 
@@ -103,7 +103,7 @@ Eski Python/tkinter sürümü (`app.py`, `core.py`) yeni sürüm yaygınlaşınc
 
 **Privacy:** read-only, no printer commands, no Bambu cloud login. TLS is verified against Bambu's CA. The LAN access code is stored in Windows Credential Manager. Only what you see on the card is sent to your local Discord client. Updates are signed and fetched from GitHub Releases.
 
-**Development:** Tauri v2 (Rust + Svelte). See the commands above, [RELEASING.md](RELEASING.md) and [docs/ROADMAP.md](docs/ROADMAP.md).
+**Development:** Tauri v2 (Rust + Svelte). See the commands above, [RELEASING.md](RELEASING.md) (releases ship from Actions → Release → Run workflow) and [docs/ROADMAP.md](docs/ROADMAP.md).
 
 </details>
 

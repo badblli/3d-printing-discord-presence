@@ -1,8 +1,15 @@
-name: Release
+name: Release build
 
+# Runs on a pushed v* tag, or from release-dispatch.yml (the "Release" button) with the tag it created.
 on:
   push:
     tags: ['v*']
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag (vX.Y.Z) to build
+        type: string
+        required: true
 
 permissions:
   contents: write
@@ -11,12 +18,15 @@ jobs:
   windows:
     runs-on: windows-latest
     env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
       PRINT_PRESENCE_DISCORD_APP_ID: ${{ vars.DISCORD_APP_ID }}
     steps:
       - uses: actions/checkout@v4.2.2
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
       - uses: actions/setup-node@v4.4.0
         with:
           node-version: '22'
@@ -28,7 +38,7 @@ jobs:
       - name: Check tag and package versions
         shell: pwsh
         run: |
-          $tagVersion = '${{ github.ref_name }}' -replace '^v', ''
+          $tagVersion = $env:RELEASE_TAG -replace '^v', ''
           $configVersion = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
           $packageVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
           $cargoVersion = (Select-String -Path src-tauri/Cargo.toml -Pattern '^version = "([^"]+)"' | Select-Object -First 1).Matches.Groups[1].Value
@@ -38,10 +48,21 @@ jobs:
       - run: npm ci
       - uses: tauri-apps/tauri-action@v0.5.25
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: Plycast ${{ github.ref_name }}
+          tagName: ${{ env.RELEASE_TAG }}
+          releaseName: Plycast ${{ env.RELEASE_TAG }}
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
           args: --bundles nsis
+      # Fixed name so releases/latest/download/Plycast-setup.exe always serves the newest installer.
+      # latest.json and the .sig still point at the versioned file.
+      - name: Upload fixed-name installer
+        shell: pwsh
+        run: |
+          $config = Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
+          $installer = "src-tauri/target/release/bundle/nsis/$($config.productName)_$($config.version)_x64-setup.exe"
+          if (-not (Test-Path $installer)) { throw "Installer not found: $installer" }
+          Copy-Item $installer Plycast-setup.exe
+          gh release upload $env:RELEASE_TAG Plycast-setup.exe --clobber --repo $env:GITHUB_REPOSITORY
+          if ($LASTEXITCODE -ne 0) { exit 1 }

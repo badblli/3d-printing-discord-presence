@@ -1,0 +1,88 @@
+name: Release
+
+# Manual "Run workflow" button. Bumps the version on main, tags it and builds the release in the
+# same run: a tag pushed with GITHUB_TOKEN does not start release.yml's tag-push trigger.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump (ignored when an exact version is given)
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      version:
+        description: Exact version x.y.z (optional)
+        type: string
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: windows-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Require main
+        if: github.ref != 'refs/heads/main'
+        shell: pwsh
+        run: throw 'Releases can only be started from main.'
+      - uses: actions/checkout@v4.2.2
+        with:
+          ref: main
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2.8.2
+        with:
+          workspaces: src-tauri -> target
+      - name: Compute next version
+        id: version
+        shell: pwsh
+        env:
+          REQUEST: ${{ inputs.version != '' && inputs.version || inputs.bump }}
+        run: |
+          $version = node scripts/next-version.mjs $env:REQUEST.Trim()
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $existing = git ls-remote --tags origin "refs/tags/v$version"
+          if ($LASTEXITCODE -ne 0) { throw 'Could not list remote tags.' }
+          if ($existing) { throw "Tag v$version already exists." }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=v$version" >> $env:GITHUB_OUTPUT
+          Write-Output "Releasing v$version"
+      - run: npm ci
+      - run: npm run release:bump -- ${{ steps.version.outputs.version }}
+      - run: npm run lint
+      - run: npm test
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+      - run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+      - name: Commit, tag and push
+        shell: pwsh
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "chore(release): $env:TAG" -- package.json package-lock.json src-tauri/Cargo.toml src-tauri/Cargo.lock src-tauri/tauri.conf.json
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          git tag $env:TAG
+          git push --atomic origin HEAD:refs/heads/main "refs/tags/$env:TAG"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+  build:
+    needs: prepare
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.prepare.outputs.tag }}
+    secrets: inherit
