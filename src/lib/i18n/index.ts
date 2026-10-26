@@ -1,6 +1,10 @@
 import type { Lang } from '../api';
 
 export const tr = {
+  discoveredPrinters: 'Ağda bulunan yazıcılar', scanning: 'Ağın taranıyor…', rescan: 'Yeniden tara',
+  discoveryEmpty: 'Yazıcı bulunamadı. Aynı ağda ve açık olduğundan emin ol ya da bilgileri elle gir.',
+  useStudioCode: 'Erişim kodunu Bambu Studio’dan al',
+  studioMissingTitle: 'Bambu Studio’da erişim kodu bulunamadı.', studioMissingHint: 'Bambu Studio’da yazıcının kayıtlı olduğunu kontrol et veya seçeneği kaldırıp LAN erişim kodunu elle gir.',
   minimize: 'Küçült', hideToTray: 'Tepsiye gizle', general: 'Genel', cardSettings: 'Discord kartı',
   updates: 'Güncellemeler', currentVersion: 'Mevcut sürüm', lastUpdateCheck: 'Son denetim', neverChecked: 'Henüz denetlenmedi', checkNow: 'Şimdi denetle', updateChecking: 'Denetleniyor…', upToDate: 'Güncel sürümü kullanıyorsun.', updateCheckFailed: 'Güncelleme denetlenemedi. Daha sonra tekrar dene.', updateAvailable: 'Yeni sürüm', updateRestart: 'Güncelle ve yeniden başlat', updateDownloading: 'Güncelleme indiriliyor', updateInstalling: 'Güncelleme kuruluyor…', updateFailed: 'Güncelleme tamamlanamadı.', updateLater: 'Sonra',
   detailsTemplate: 'Üst satır', stateTemplate: 'Alt satır', resetTemplates: 'Varsayılana dön',
@@ -59,6 +63,10 @@ export const tr = {
 
 export type Key = keyof typeof tr;
 export const en: Record<Key, string> = {
+  discoveredPrinters: 'Printers on your network', scanning: 'Scanning your network…', rescan: 'Scan again',
+  discoveryEmpty: 'No printers found. Make sure your printer is on and on the same network, or enter its details manually.',
+  useStudioCode: 'Get the access code from Bambu Studio',
+  studioMissingTitle: 'No access code found in Bambu Studio.', studioMissingHint: 'Check that your printer is saved in Bambu Studio, or uncheck the option and enter the LAN access code manually.',
   minimize: 'Minimize', hideToTray: 'Hide to tray', general: 'General', cardSettings: 'Discord card',
   updates: 'Updates', currentVersion: 'Current version', lastUpdateCheck: 'Last checked', neverChecked: 'Never checked', checkNow: 'Check now', updateChecking: 'Checking…', upToDate: 'You are up to date.', updateCheckFailed: 'Could not check for updates. Try again later.', updateAvailable: 'New version', updateRestart: 'Update and restart', updateDownloading: 'Downloading update', updateInstalling: 'Installing update…', updateFailed: 'Could not complete the update.', updateLater: 'Later',
   detailsTemplate: 'Top line', stateTemplate: 'Bottom line', resetTemplates: 'Reset to default',

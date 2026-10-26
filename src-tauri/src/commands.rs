@@ -75,6 +75,7 @@ fn save_with_autostart(
     app: &AppHandle,
     config: AppConfig,
     secrets: Vec<SecretUpdate>,
+    studio_secrets: Vec<Uuid>,
 ) -> Result<(), String> {
     crate::config::validate::validate_config(&config).map_err(|error| error.to_string())?;
     let changed = settings.config.autostart != config.autostart;
@@ -82,7 +83,7 @@ fn save_with_autostart(
     if changed {
         apply_autostart(app, requested)?;
     }
-    let result = settings.save(config, secrets);
+    let result = settings.save_with_studio(config, secrets, studio_secrets);
     if result.is_err() && changed && settings.config.autostart != requested {
         apply_autostart(app, settings.config.autostart).map_err(|_| "autostart_rollback_failed")?;
     }
@@ -105,9 +106,12 @@ pub async fn save_config(
     state: State<'_, Runtime>,
     config: AppConfig,
     secrets: Vec<SecretUpdate>,
+    // Printer ids whose access code is read from Bambu Studio on the backend; optional for older callers.
+    studio_secrets: Option<Vec<Uuid>>,
 ) -> Result<ConfigView, String> {
+    let studio_secrets = studio_secrets.unwrap_or_default();
     mutate(app, &state, move |settings, app| {
-        save_with_autostart(settings, app, config, secrets)
+        save_with_autostart(settings, app, config, secrets, studio_secrets)
     })
     .await
 }
@@ -138,7 +142,14 @@ pub async fn set_autostart(
     mutate(app, &state, move |settings, app| {
         let mut config = settings.config.clone();
         config.autostart = enabled;
-        save_with_autostart(settings, app, config, Vec::new())
+        save_with_autostart(settings, app, config, Vec::new(), Vec::new())
     })
     .await
+}
+
+#[tauri::command]
+pub async fn discover_printers(seconds: Option<u8>) -> Vec<crate::discovery::Discovered> {
+    tauri::async_runtime::spawn_blocking(move || crate::discovery::discover(seconds))
+        .await
+        .unwrap_or_default()
 }

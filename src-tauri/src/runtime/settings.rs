@@ -114,7 +114,52 @@ impl Settings {
     }
 
     pub fn save(&mut self, config: AppConfig, updates: Vec<SecretUpdate>) -> Result<(), String> {
+        self.save_with_studio(config, updates, Vec::new())
+    }
+
+    pub fn save_with_studio(
+        &mut self,
+        config: AppConfig,
+        updates: Vec<SecretUpdate>,
+        studio_secrets: Vec<Uuid>,
+    ) -> Result<(), String> {
+        self.save_with_studio_at(
+            config,
+            updates,
+            studio_secrets,
+            dirs::config_dir().as_deref(),
+        )
+    }
+
+    fn save_with_studio_at(
+        &mut self,
+        config: AppConfig,
+        mut updates: Vec<SecretUpdate>,
+        studio_secrets: Vec<Uuid>,
+        studio_root: Option<&Path>,
+    ) -> Result<(), String> {
         validate_config(&config).map_err(|error| error.to_string())?;
+        let mut requested: HashSet<_> = updates.iter().map(|update| update.id).collect();
+        // Detect collisions before reading Studio or writing any credentials.
+        for id in &studio_secrets {
+            if !requested.insert(*id) {
+                return Err("duplicate_secret_printer".into());
+            }
+        }
+        for id in studio_secrets {
+            let printer = config
+                .printers
+                .iter()
+                .find(|printer| printer.id == id)
+                .ok_or("unknown_secret_printer")?;
+            let PrinterConnection::Bambu { serial, .. } = &printer.connection else {
+                return Err("studio_code_missing".into());
+            };
+            let secret = studio_root
+                .and_then(|root| crate::discovery::studio::access_code(root, serial))
+                .ok_or("studio_code_missing")?;
+            updates.push(SecretUpdate { id, secret });
+        }
         let mut ids = HashSet::new();
         // Validate the entire request before any keychain or disk writes.
         for update in &updates {
@@ -317,6 +362,113 @@ fn os_locale() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn studio_fixture(root: &Path) -> AppConfig {
+        std::fs::create_dir(root.join("BambuStudio")).unwrap();
+        std::fs::write(
+            root.join("BambuStudio/BambuStudio.conf"),
+            r#"{"access_code":{"00M00A000000000":"12345678"}}"#,
+        )
+        .unwrap();
+        AppConfig {
+            printers: vec![PrinterConfig {
+                id: Uuid::from_u128(1),
+                name: "Fake printer".into(),
+                enabled: true,
+                connection: PrinterConnection::Bambu {
+                    host: "192.168.1.50".into(),
+                    serial: "00M00A000000000".into(),
+                    model: None,
+                },
+            }],
+            ..AppConfig::default()
+        }
+    }
+
+    #[test]
+    fn studio_save_keeps_code_in_keyring_only() {
+        let dir = tempfile::tempdir().unwrap();
+        let studio = tempfile::tempdir().unwrap();
+        let config = studio_fixture(studio.path());
+        let id = config.printers[0].id;
+        let secrets = Arc::new(crate::config::MemoryStore::default());
+        let mut settings =
+            Settings::load_for_environment(dir.path(), secrets.clone(), "en-US", false).unwrap();
+        settings
+            .save_with_studio_at(config, vec![], vec![id], Some(studio.path()))
+            .unwrap();
+        assert!(secrets.get(id).unwrap().as_deref() == Some("12345678"));
+        assert!(settings.view().unwrap().printers[0].has_secret);
+        for serialized in [
+            serde_json::to_string(&settings.view().unwrap()).unwrap(),
+            std::fs::read_to_string(dir.path().join("config.json")).unwrap(),
+        ] {
+            assert!(!serialized.contains("12345678"));
+            assert!(!serialized.contains("access_code"));
+        }
+    }
+
+    #[test]
+    fn studio_missing_and_duplicate_requests_do_not_write() {
+        let dir = tempfile::tempdir().unwrap();
+        let studio = tempfile::tempdir().unwrap();
+        let config = studio_fixture(studio.path());
+        let id = config.printers[0].id;
+        let secrets = Arc::new(crate::config::MemoryStore::default());
+        let mut settings =
+            Settings::load_for_environment(dir.path(), secrets.clone(), "en-US", false).unwrap();
+        assert_eq!(
+            settings
+                .save_with_studio_at(config.clone(), vec![], vec![id], None)
+                .unwrap_err(),
+            "studio_code_missing"
+        );
+        assert_eq!(
+            settings
+                .save_with_studio_at(
+                    config.clone(),
+                    vec![SecretUpdate {
+                        id,
+                        secret: "87654321".into()
+                    }],
+                    vec![id],
+                    Some(studio.path())
+                )
+                .unwrap_err(),
+            "duplicate_secret_printer"
+        );
+        assert_eq!(
+            settings
+                .save_with_studio_at(config, vec![], vec![id, id], Some(studio.path()))
+                .unwrap_err(),
+            "duplicate_secret_printer"
+        );
+        assert!(secrets.get(id).unwrap().is_none());
+        assert_eq!(settings.revision(), 0);
+        assert!(!dir.path().join("config.json").exists());
+    }
+
+    #[test]
+    fn studio_save_rolls_back_when_config_write_fails() {
+        let dir = tempfile::tempdir().unwrap();
+        let studio = tempfile::tempdir().unwrap();
+        let config = studio_fixture(studio.path());
+        let id = config.printers[0].id;
+        let secrets = Arc::new(crate::config::MemoryStore::default());
+        let mut settings =
+            Settings::load_for_environment(dir.path(), secrets.clone(), "en-US", false).unwrap();
+        secrets.set(id, "87654321").unwrap();
+        std::fs::create_dir(dir.path().join("config.json")).unwrap();
+        assert_eq!(
+            settings
+                .save_with_studio_at(config, vec![], vec![id], Some(studio.path()))
+                .unwrap_err(),
+            "config_io_failed"
+        );
+        assert!(secrets.get(id).unwrap().as_deref() == Some("87654321"));
+        assert!(settings.config.printers.is_empty());
+        assert_eq!(settings.revision(), 0);
+    }
 
     #[test]
     fn locale_selects_turkish_only_for_tr_prefix() {

@@ -2,6 +2,7 @@ import { translate, type Key } from './i18n';
 import type { Lang } from './api';
 
 const codes: Record<string, [Key, Key]> = {
+  studio_code_missing: ['studioMissingTitle', 'studioMissingHint'],
   unreachable: ['unreachableTitle', 'unreachableHint'],
   auth_rejected: ['authTitle', 'authHint'], AuthRejected: ['authTitle', 'authHint'],
   subscribe_denied: ['subscribeTitle', 'subscribeHint'],
